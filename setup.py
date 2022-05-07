@@ -19,4 +19,7 @@ setup(
     packages=find_packages(),
     entry_points={"console_scripts": ["theticketpost-service = src.app:main"]},
     python_requires=">=3.7",
+    install_requires=[
+        'flask',
+    ],
 )

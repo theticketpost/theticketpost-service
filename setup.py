@@ -10,8 +10,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/theticketpost/theticketpost-service",
-    author="David Antunez, Bruno Cabado",
-    author_email="@eipporko, @brunocabado",
+    author="David Antunez, Bruno Cabado, David Maseda",
+    author_email="@eipporko, @brunocabado, @wizenink",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",

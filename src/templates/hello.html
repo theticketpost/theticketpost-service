@@ -1,9 +1,6 @@
-<html>
-    <head>
-        <title>{{ title }}</title>
-    </head>
-    <body>
-        <img src="{{ url_for('static', filename='header.png') }}" alt="theticketpost logo">
-        <h1>Hello {{ username }}</h1>
-    </body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <img src="{{ url_for('static', filename='header.png') }}" alt="theticketpost logo">
+    <h1>Hello {{ username }}</h1>
+{% endblock %}

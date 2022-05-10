@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lant="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <!-- CSS only -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+        <script src="https://unpkg.com/vue@3"></script>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-6 mx-auto mt-5">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+    </body>
+</html>

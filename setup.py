@@ -12,6 +12,8 @@ setup(
     url="https://github.com/theticketpost/theticketpost-service",
     author="David Antunez, Bruno Cabado, David Maseda",
     author_email="@eipporko, @brunocabado, @wizenink",
+    include_package_data=True,
+    zip_safe=False,
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",

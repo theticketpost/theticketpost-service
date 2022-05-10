@@ -10,3 +10,7 @@ $bash> python3 setup.py install
 $bash> theticketpost-service
 ```
 Open a browser and navigates to `localhost:8080`
+
+
+## Mockup
+You can find the mockup [here](https://mydraft.cc/c9t85hh6j4edn171387g)

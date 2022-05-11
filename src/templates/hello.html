@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <img src="{{ url_for('static', filename='header.png') }}" alt="theticketpost logo">
+<div class="p-5 text-center bg-light">
     <h1>Hello {{ username }}</h1>
+    <h4 class="mb-3">Subheading</h4>
+</div>
 {% endblock %}

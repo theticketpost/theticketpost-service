@@ -6,7 +6,8 @@ app = Flask(__name__)
 @app.route('/index')
 def hello():
     name = 'Motherfucker'
-    return render_template('hello.html', title='TheTicketPost', username=name)
+    version = '0.0.1'
+    return render_template('hello.html', title='TheTicketPost', version=version, username=name)
 
 def main():
     app.run( host='0.0.0.0', port=8080 )

@@ -10,7 +10,6 @@ version = '0.0.1'
 @app.route('/dashboard')
 def dashboard():
     name = 'Motherfucker'
-    version = '0.0.1'
     return render_template('dashboard.html', title='TheTicketPost', version=version, username=name)
 
 

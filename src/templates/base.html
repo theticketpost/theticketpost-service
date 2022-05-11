@@ -22,20 +22,22 @@
             </nav>
         </header>
 
-        <!-- Sidebar -->
         <div class="container-fluid">
             <div class="row" >
+                <!-- Sidebar -->
                 <div class="col-sm-3 col-md-2 sidebar">
                     <ul class="nav nav-sidebar d-inline">
-                        <li><a href="">My Apps</a></li>
-                        <li><a href="">Appstore</a></li>
-                        <li><a href="">Settings</a></li>
-                        <li><a href="">About</a></li>
+                        <li class="{{ 'active' if active_page == 'dashboard' else '' }}"><a href="dashboard">Dashboard</a></li>
+                        <li class="{{ 'active' if active_page == 'apps' else '' }}"><a href="apps">My Apps</a></li>
+                        <li class="{{ 'active' if active_page == 'store' else '' }}"><a href="store">Appstore</a></li>
+                        <li class="{{ 'active' if active_page == 'settings' else '' }}"><a href="settings">Settings</a></li>
+                        <li class="{{ 'active' if active_page == 'about' else '' }}"><a href="about">About</a></li>
                     </ul>
                     <div class="sidebar-footer">
                         <li>version {{ version }}</li>
                     </div>
                 </div>
+                
                 <div class="col-sm-9 col-md-10">
                     {% block content %}
                     {% endblock %}

@@ -15,7 +15,7 @@
         <header>
             <nav class="navbar navbar-dark navbar-full bg-inverse">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">
+                    <a class="navbar-brand" href="dashboard">
                         <img src="{{ url_for('static', filename='header.png') }}" height="30" class="d-inline-block align-top" alt="theticketpost logo">
                     </a>
                 </div>
@@ -37,7 +37,7 @@
                         <li>version {{ version }}</li>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-9 col-md-10">
                     {% block content %}
                     {% endblock %}

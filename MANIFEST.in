@@ -1,2 +1,2 @@
-recursive-include src/templates *
-recursive-include src/static *
+recursive-include theticketpost/templates *
+recursive-include theticketpost/static *

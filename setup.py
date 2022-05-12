@@ -19,7 +19,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(),
-    entry_points={"console_scripts": ["theticketpost-service = src.app:main"]},
+    entry_points={"console_scripts": ["theticketpost-service = theticketpost.app:main"]},
     python_requires=">=3.7",
     install_requires=[
         'flask',

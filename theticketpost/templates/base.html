@@ -16,7 +16,7 @@
             <nav class="navbar navbar-dark navbar-full bg-inverse">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="dashboard">
-                        <img src="{{ url_for('static', filename='header.png') }}" height="30" class="d-inline-block align-top" alt="theticketpost logo">
+                        <img src="{{ url_for('static', filename='header.png') }}" height="30" class="d-inline-block align-top px-4" alt="theticketpost logo">
                     </a>
                 </div>
             </nav>
@@ -25,20 +25,21 @@
         <div class="container-fluid">
             <div class="row" >
                 <!-- Sidebar -->
-                <div class="col-sm-3 col-md-2 sidebar">
-                    <ul class="nav nav-sidebar d-inline">
-                        <li class="{{ 'active' if active_page == 'dashboard' else '' }}"><a href="dashboard">Dashboard</a></li>
-                        <li class="{{ 'active' if active_page == 'apps' else '' }}"><a href="apps">My Apps</a></li>
-                        <li class="{{ 'active' if active_page == 'store' else '' }}"><a href="store">Appstore</a></li>
-                        <li class="{{ 'active' if active_page == 'settings' else '' }}"><a href="settings">Settings</a></li>
-                        <li class="{{ 'active' if active_page == 'about' else '' }}"><a href="about">About</a></li>
+                <div class="col-md-3 sidebar text-white bg-dark">
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item"><a class="nav-link {{ 'active' if active_page == 'dashboard' else '' }}" href="dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link {{ 'active' if active_page == 'apps' else '' }}" href="apps">My Apps</a></li>
+                        <li class="nav-item"><a class="nav-link {{ 'active' if active_page == 'store' else '' }}" href="store">Appstore</a></li>
+                        <li class="nav-item"><a class="nav-link {{ 'active' if active_page == 'settings' else '' }}" href="settings">Settings</a></li>
+                        <li class="nav-item"><a class="nav-link {{ 'active' if active_page == 'about' else '' }}" href="about">About</a></li>
                     </ul>
-                    <div class="sidebar-footer">
-                        <li>version {{ version }}</li>
+                    <hr>
+                    <div class="px-2">
+                        version {{ version }}
                     </div>
                 </div>
 
-                <div class="col-sm-9 col-md-10">
+                <div class="col-md-9">
                     {% block content %}
                     {% endblock %}
                 </div>

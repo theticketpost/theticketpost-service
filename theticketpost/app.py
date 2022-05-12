@@ -1,3 +1,5 @@
+import theticketpost.config.settings
+
 from flask import Flask, render_template
 
 app = Flask(__name__)
@@ -25,6 +27,7 @@ def store():
 
 @app.route('/settings')
 def settings():
+    theticketpost.config.settings.set( 12, 12, 12)
     return render_template('settings.html', title='TheTicketPost', version=version)
 
 

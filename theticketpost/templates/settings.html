@@ -7,11 +7,11 @@
     <h1>Settings</h1>
 </div>
 <div class="container px-4">
-    <form action="">
+    <form action="{{ url_for('settings') }}" method="post" target="dummyframe">
         <div class="form-group row">
             <div class="col-9">
                 <label for="">Test</label>
-                <input type="text" class="form-control">
+                <input type="text" class="form-control" name="test" value="{{ config.test }}">
             </div>
             <div class="col-auto mt-auto">
                 <button type="submit" class="btn btn-success">Save</button>

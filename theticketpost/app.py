@@ -1,6 +1,6 @@
-import theticketpost.config.settings
+import theticketpost.settings
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -25,10 +25,15 @@ def store():
     return render_template('store.html', title='TheTicketPost', version=version)
 
 
-@app.route('/settings')
+@app.route('/settings', methods=['POST', 'GET'])
 def settings():
-    theticketpost.config.settings.set( 12, 12, 12)
-    return render_template('settings.html', title='TheTicketPost', version=version)
+    config = theticketpost.settings.get_json("config")
+
+    if ( request.method == 'POST' ):
+        config['test'] = request.form['test']
+        theticketpost.settings.save_json( "config", config )
+
+    return render_template('settings.html', title='TheTicketPost', version=version, config=config)
 
 
 @app.route('/about')

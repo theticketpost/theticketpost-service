@@ -3,7 +3,21 @@
 {% set active_page = 'settings' %}
 
 {% block content %}
-<div class="p-5 text-center bg-light">
+<div class="p-5 text-center">
     <h1>Settings</h1>
 </div>
+<div class="container">
+    <form action="">
+        <div class="form-group row">
+            <div class="col-9">
+                <label for="">Test</label>
+                <input type="text" class="form-control">
+            </div>
+            <div class="col-auto mt-auto">
+                <button type="submit" class="btn btn-success">Save</button>
+            </div>
+        </div>
+    </form>
+</div>
+
 {% endblock %}

@@ -9,10 +9,10 @@ version = '0.0.1'
 
 @app.route('/')
 @app.route('/index')
-@app.route('/dashboard')
+@app.route('/newspaper')
 def dashboard():
     name = 'Motherfucker'
-    return render_template('dashboard.html', title='TheTicketPost', version=version, username=name)
+    return render_template('newspaper.html', title='TheTicketPost', version=version, username=name)
 
 
 @app.route('/apps')

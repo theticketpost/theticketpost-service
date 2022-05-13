@@ -17,6 +17,10 @@ svg {
     box-shadow:         1px 0 15px 0 #555;
 }
 
+.content {
+    overflow-y: auto;
+}
+
 #newspaper {
     min-height: 500px;
     border: 1px solid;

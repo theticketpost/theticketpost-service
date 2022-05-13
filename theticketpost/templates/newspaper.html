@@ -4,6 +4,10 @@
 
 {% block content %}
 <div class="p-5 text-center">
-    <h1>Ticket width {{ paper_width }} px</h1>
+    <div class="d-flex justify-content-center flex-nowrap">
+        {% if paper_width > 0 %}
+            <div id="newspaper"style="width: {{ paper_width}}px;"></div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

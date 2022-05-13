@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="6.6145568mm"
+   height="7.5353198mm"
+   viewBox="0 0 6.6145568 7.5353198"
+   version="1.1"
+   id="svg15412"
+   inkscape:version="1.1.2 (08b2f3d93c, 2022-04-05)"
+   sodipodi:docname="theticketpost_min_white.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview15414"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="3.1963805"
+     inkscape:cx="49.430911"
+     inkscape:cy="80.090591"
+     inkscape:window-width="1280"
+     inkscape:window-height="1043"
+     inkscape:window-x="1280"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="text16047" />
+  <defs
+     id="defs15409" />
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-80.023376,-117.11953)">
+    <g
+       aria-label="tp"
+       id="text16047"
+       style="font-size:10.5833px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583">
+      <path
+         d="m 82.499862,119.00336 v -0.53975 h -1.079497 l -0.01058,-1.34408 -1.375829,1.72508 -0.01058,0.14816 h 0.370415 v 2.73049 q 0,0.46567 -0.285749,0.762 0.582082,0.20108 1.333496,0.80433 l 0.952497,-0.82549 -0.116416,-0.14817 -0.296333,0.23283 -0.560915,-0.46566 v -3.07974 z"
+         style="font-family:'Old London';-inkscape-font-specification:'Old London';fill:#ffffff;fill-opacity:1"
+         id="path18921" />
+      <path
+         d="m 86.637929,122.28418 v -2.34949 q 0,-1.25942 -1.05833,-1.61925 l -1.09008,1.02658 q -0.09525,-0.6985 -0.730248,-1.03716 l -0.888997,0.79375 0.116416,0.0847 0.253999,-0.15875 q 0.243416,0.14817 0.243416,0.62442 v 2.41299 q -0.391582,0.11642 -0.560914,0.1905 v 0.30692 h 0.232832 q 0.190499,0 0.306916,0.0423 l 0.02117,0.6985 q 0.02117,0.62441 -0.402165,1.13241 0.201083,-0.0318 0.412749,-0.15875 0.05292,-0.0423 0.148166,-0.11642 0.09525,-0.0635 0.211666,-0.16933 0.148166,0.15875 0.232832,0.254 0.08467,0.0952 0.127,0.11642 0.264583,0.23283 0.719664,0.29633 -0.317499,-0.43392 -0.402165,-0.70908 -0.127,-0.381 -0.09525,-0.71967 l 0.03175,-0.381 q 0.582082,0.28575 0.888997,0.41275 0.232833,-0.21166 0.380999,-0.33866 0.15875,-0.13759 0.232833,-0.1905 0.359832,-0.26458 0.666748,-0.4445 z m -0.941914,0.17992 q -0.296332,-0.10584 -0.603248,-0.20109 -0.296332,-0.0952 -0.624415,-0.17991 v -2.42358 l 0.634998,-0.56091 q 0.09525,0.0318 0.201083,0.0953 0.105833,0.0635 0.190499,0.14816 0.08467,0.0847 0.137583,0.17992 0.0635,0.0847 0.0635,0.16933 z"
+         style="font-family:'Old London';-inkscape-font-specification:'Old London';fill:#ffffff;fill-opacity:1"
+         id="path18923" />
+    </g>
+  </g>
+</svg>

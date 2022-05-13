@@ -7,16 +7,26 @@
     <h1>Settings</h1>
 </div>
 <div class="container px-4">
-    <form action="{{ url_for('settings') }}" method="post" target="dummyframe">
-        <div class="form-group row">
-            <div class="col-9">
-                <label for="">Test</label>
-                <input type="text" class="form-control" name="test" value="{{ config.test }}">
+    <h4 class="mb-3">Printer settings</h4>
+    <form action="{{ url_for('settings') }}" method="post">
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <label for="printer_dpi" class="form-label">dpi</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="printer_dpi" placeholder="" value="{{ config.printer_dpi }}" name="printer_dpi" required="">
+                    <span class="input-group-text">dpi</span>
+                </div>
             </div>
-            <div class="col-auto mt-auto">
-                <button type="submit" class="btn btn-success">Save</button>
+            <div class="col-sm-6">
+                <label for="printer_paper_width" class="form-label">Paper width</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="printer_paper_width" placeholder="" value="{{ config.printer_paper_width }}" name="printer_paper_width" required="">
+                    <span class="input-group-text">mm</span>
+                </div>
             </div>
         </div>
+        <hr class="my-4">
+        <button type="submit" class="w-100 btn btn-primary btn-lg"">Save settings</button>
     </form>
 </div>
 

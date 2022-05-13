@@ -11,8 +11,14 @@ version = '0.0.1'
 @app.route('/index')
 @app.route('/newspaper')
 def dashboard():
-    name = 'Motherfucker'
-    return render_template('newspaper.html', title='TheTicketPost', version=version, username=name)
+    config = theticketpost.settings.get_json("config")
+    ticket_px_width = 0
+    if 'printer_dpi' in config and 'printer_paper_width' in config:
+        dpi = config['printer_dpi']
+        paper_width = config['printer_paper_width']
+        ticket_px_width = round(dpi * paper_width / 25.4)
+
+    return render_template('newspaper.html', title='TheTicketPost', version=version, paper_width=ticket_px_width)
 
 
 @app.route('/apps')
@@ -30,7 +36,9 @@ def settings():
     config = theticketpost.settings.get_json("config")
 
     if ( request.method == 'POST' ):
-        config['test'] = request.form['test']
+        print( request.form )
+        config['printer_dpi'] = int(request.form['printer_dpi'])
+        config['printer_paper_width'] = int(request.form['printer_paper_width'])
         theticketpost.settings.save_json( "config", config )
 
     return render_template('settings.html', title='TheTicketPost', version=version, config=config)

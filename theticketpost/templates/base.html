@@ -32,12 +32,9 @@
         </svg>
         <main>
 
-            <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
-
+            <div class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
                 <img src="{{ url_for('static', filename='theticketpost_horizontal_white.svg') }}" alt="">
-
                 <hr>
-
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if active_page == 'dashboard' else 'text-white' }}" href="newspaper">
@@ -80,13 +77,12 @@
                         </a>
                     </li>
                 </ul>
-
                 <hr>
-
                 <div class="px-2">
                     version {{ version }}
                 </div>
             </div>
+
             <div class="col">
                 {% block content %}
                 {% endblock %}

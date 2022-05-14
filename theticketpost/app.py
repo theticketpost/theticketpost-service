@@ -6,11 +6,11 @@ app = Flask(__name__)
 
 version = '0.0.1'
 
-
+# WEB SERVER METHODS
 @app.route('/')
 @app.route('/index')
 @app.route('/newspaper')
-def dashboard():
+def newspaper():
     config = theticketpost.settings.get_json("config")
     ticket_px_width = 0
     if 'printer_dpi' in config and 'printer_paper_width' in config:
@@ -48,6 +48,23 @@ def settings():
 def about():
     return render_template('about.html', title='TheTicketPost', version=version)
 
+
+# API REST METHODS
+@app.route('/api/<string:file>', methods=['GET', 'POST'])
+def get_settings(file):
+
+    if ( request.method == 'GET'):
+        json = theticketpost.settings.get_json(file)
+        return json
+
+    if ( request.method == 'POST'):
+        content_type = request.headers.get('Content-Type')
+        if (content_type == 'application/json'):
+            json = request.json
+            theticketpost.settings.save_json(file, json)
+            return 200
+
+    return 200
 
 def main():
     app.run( host='0.0.0.0', port=8080 )

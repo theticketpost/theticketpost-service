@@ -1,7 +1,10 @@
-
+window.onload = function() {
 const { createApp } = Vue
 
 const NewspaperApp = {
+    components: {
+        vuedraggable,
+    },
     data() {
         return {
             apps: []
@@ -9,10 +12,14 @@ const NewspaperApp = {
     },
     delimiters: ['{', '}'],
     methods: {
-        add: function() {
-            this.apps.push({ title: "test" });
+        add: function(title) {
+            this.apps.push({ title: title });
+        },
+        del: function( ev ) {
+
         }
     }
 }
 
 createApp(NewspaperApp).mount('#newspaper-app');
+}

@@ -50,7 +50,7 @@ def about():
 
 
 # API REST METHODS
-@app.route('/api/<string:file>', methods=['GET', 'POST'])
+@app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
 def get_settings(file):
 
     if ( request.method == 'GET'):
@@ -65,6 +65,7 @@ def get_settings(file):
             return 200
 
     return 200
+
 
 def main():
     app.run( host='0.0.0.0', port=8080 )

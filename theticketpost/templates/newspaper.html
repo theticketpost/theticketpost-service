@@ -36,43 +36,43 @@
 
     <div class="p-5">
         <div class="col mb-4">
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Image')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#card-image"></use>
                 </svg>
                 Image
             </button>
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Text')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#card-text"></use>
                 </svg>
                 Text
             </button>
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Weather')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#weather"></use>
                 </svg>
                 Weather
             </button>
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Meetings')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#calendar"></use>
                 </svg>
                 Meetings
             </button>
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Tasks')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#tasks"></use>
                 </svg>
                 Tasks
             </button>
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Twitter')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#twitter"></use>
                 </svg>
                 Twitter
             </button>
-            <button type="button" class="btn btn-dark mx-1" @click="add">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Quotation')">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#quote"></use>
                 </svg>
@@ -84,15 +84,26 @@
             {% if paper_width > 0 %}
                 <div id="newspaper" style="width: {{ paper_width}}px;">
 
-                    <div class="card" v-for="app, index in apps" :key="index">
-                        <div class="card-body row justify-content-between">
-                            { app.title }
-                        </div>
-                    </div>
+                    <vuedraggable :list="apps" item-key="title" class="list-group" >
+                        <template #item="{ element }">
+                            <div class="card list-group-item">
+                                <div class="card-body row justify-content-between">
+                                    { element.title }
+                                </div>
+                            </div>
+                        </template>
+                    </vuedraggable>
 
                 </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.10.2/Sortable.min.js"></script>
+<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+<script src="//www.unpkg.com/vuedraggable@4.1.0/dist/vuedraggable.umd.js"></script>
+
+<script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
 {% endblock %}

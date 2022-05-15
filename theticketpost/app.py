@@ -1,6 +1,6 @@
 import theticketpost.settings
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
@@ -51,20 +51,20 @@ def about():
 
 # API REST METHODS
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
-def get_settings(file):
+def save_or_get_settings(file):
 
     if ( request.method == 'GET'):
         json = theticketpost.settings.get_json(file)
-        return json
+        return jsonify(json)
 
     if ( request.method == 'POST'):
         content_type = request.headers.get('Content-Type')
         if (content_type == 'application/json'):
             json = request.json
             theticketpost.settings.save_json(file, json)
-            return 200
+            return "200"
 
-    return 200
+    return "500"
 
 
 def main():

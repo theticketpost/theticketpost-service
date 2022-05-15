@@ -84,7 +84,7 @@
             {% if paper_width > 0 %}
                 <div id="newspaper" style="width: {{ paper_width}}px;">
 
-                    <vuedraggable :list="apps" item-key="title" class="list-group" >
+                    <vuedraggable :list="apps" item-key="id" class="list-group" @end="save_json()">
                         <template #item="{ element }">
                             <div class="card list-group-item">
                                 <div class="card-body row justify-content-between">
@@ -105,5 +105,5 @@
 <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
 <script src="//www.unpkg.com/vuedraggable@4.1.0/dist/vuedraggable.umd.js"></script>
 
-<script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='newspaper.js') }}"></script>
 {% endblock %}

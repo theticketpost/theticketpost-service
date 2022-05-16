@@ -26,3 +26,11 @@ svg {
     border: 1px solid darkgray;
     background-color: rgb(248,249,250);
 }
+
+.component button {
+    visibility: hidden;
+}
+
+.component:hover button {
+    visibility: visible;
+}

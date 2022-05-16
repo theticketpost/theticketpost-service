@@ -19,10 +19,14 @@ const NewspaperApp = {
             this.apps.push({ title: title, id: this.id++ });
             this.save_json();
         },
-        del: function( id ) {
+        del: function( index ) {
+            this.apps.splice(index, 1);
             this.save_json();
         },
         save_json: async function() {
+            this.apps.forEach( (element, index) => {
+                element.id = index;
+            });
             const response = await fetch('/api/settings/newspaper', {
                 method: 'POST',
                 headers: {

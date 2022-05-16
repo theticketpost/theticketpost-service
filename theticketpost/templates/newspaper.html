@@ -84,11 +84,12 @@
             {% if paper_width > 0 %}
                 <div id="newspaper" style="width: {{ paper_width}}px;">
 
-                    <vuedraggable :list="apps" item-key="id" class="list-group" @end="save_json()">
-                        <template #item="{ element }">
+                    <vuedraggable v-model="apps" item-key="id" class="list-group" @end="save_json()">
+                        <template #item="{ element, index }">
                             <div class="card list-group-item">
-                                <div class="card-body row justify-content-between">
+                                <div class="component card-body row justify-content-between">
                                     { element.title }
+                                    <button type="submit" class="btn-close float-end" @click="del(index)"></button>
                                 </div>
                             </div>
                         </template>

@@ -28,3 +28,11 @@ Open a browser and navigates to `localhost:8080`
 ## Mockup
 
 You can find the mockup [here](https://mydraft.cc/c9t85hh6j4edn171387g)
+
+## pageres
+```bash
+$bash> npm install --global pageres-cli
+$bash> pageres http://localhost:8080 1920x8000 --selector=div#newspaper --overwrite --filename=last_newspaper
+```
+
+[Pageres Github](https://github.com/sindresorhus/pageres-cli)

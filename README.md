@@ -9,8 +9,13 @@ $bash> source .theticketpost/bin/activate
 $bash> pip install --upgrade pip
 
 # Service installation
-$bash> python3 setup.py install
+$bash> python3 setup.py install --record files.txt
+
+# Service uninstallation
+$bash> xargs rm -rf < files.txt
 ```
+
+
 
 ## How to run
 

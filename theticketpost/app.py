@@ -40,15 +40,14 @@ def settings():
     if (request.method == 'POST'):
         print(request.form)
         config['printer_dpi'] = int(request.form['printer_dpi'])
-        config['printer_paper_width'] = int(
-            request.form['printer_paper_width'])
-        config['schedule'] = {'monday': request.form['schedule-monday'],
-                            'tuesday': request.form['schedule-tuesday'],
-                            'wednesday': request.form['schedule-wednesday'],
-                            'thursday': request.form['schedule-thursday'],
-                            'friday': request.form['schedule-friday'],
-                            'saturday': request.form['schedule-saturday'],
-                            'sunday': request.form['schedule-sunday']}
+        config['printer_paper_width'] = int(request.form['printer_paper_width'])
+        config['schedule'] = {'monday': 'schedule-monday' in request.form,
+                            'tuesday': 'schedule-tuesday' in request.form,
+                            'wednesday': 'schedule-wednesday' in request.form,
+                            'thursday': 'schedule-thursday' in request.form,
+                            'friday': 'schedule-friday' in request.form,
+                            'saturday': 'schedule-saturday' in request.form,
+                            'sunday': 'schedule-sunday' in request.form }
         theticketpost.settings.save_json("config", config)
 
     return render_template('settings.html', title='TheTicketPost', version=version, config=config)

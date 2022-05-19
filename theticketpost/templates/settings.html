@@ -32,31 +32,31 @@
         <div class="row g-3">
             <div class="col-sm-6">
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-monday" name="schedule-monday" value="{{ config.schedule.monday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-monday" name="schedule-monday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.monday )) else '' }} >
                     <label class="form-check-label" for="schedule-monday">Monday</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-tuesday" name="schedule-tuesday" value="{{ config.schedule.tuesday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-tuesday" name="schedule-tuesday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.tuesday )) else '' }} >
                     <label class="form-check-label" for="schedule-tuesday">Tuesday</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-wednesday" name="schedule-wednesday" value="{{ config.schedule.wednesday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-wednesday" name="schedule-wednesday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.wednesday )) else '' }} >
                     <label class="form-check-label" for="schedule-wednesday">Wednesday</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-thursday" name="schedule-thursday" value="{{ config.schedule.thursday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-thursday" name="schedule-thursday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.thursday )) else '' }} >
                     <label class="form-check-label" for="schedule-thursday">Thursday</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-friday" name="schedule-friday" value="{{ config.schedule.friday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-friday" name="schedule-friday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.friday )) else '' }} >
                     <label class="form-check-label" for="schedule-friday">Friday</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-saturday" name="schedule-saturday" value="{{ config.schedule.saturday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-saturday" name="schedule-saturday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.saturday )) else '' }} >
                     <label class="form-check-label" for="schedule-saturday">Saturday</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="schedule-sunday" name="schedule-sunday" value="{{ config.schedule.sunday }}">
+                    <input type="checkbox" class="form-check-input" id="schedule-sunday" name="schedule-sunday" {{ 'checked' if (( 'schedule' in config ) and ( config.schedule.sunday )) else '' }} >
                     <label class="form-check-label" for="schedule-sunday">Sunday</label>
                 </div>
             </div>

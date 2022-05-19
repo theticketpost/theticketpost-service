@@ -7,6 +7,8 @@ app = Flask(__name__)
 version = '0.0.1'
 
 # WEB SERVER METHODS
+
+
 @app.route('/')
 @app.route('/index')
 @app.route('/newspaper')
@@ -35,11 +37,19 @@ def store():
 def settings():
     config = theticketpost.settings.get_json("config")
 
-    if ( request.method == 'POST' ):
-        print( request.form )
+    if (request.method == 'POST'):
+        print(request.form)
         config['printer_dpi'] = int(request.form['printer_dpi'])
-        config['printer_paper_width'] = int(request.form['printer_paper_width'])
-        theticketpost.settings.save_json( "config", config )
+        config['printer_paper_width'] = int(
+            request.form['printer_paper_width'])
+        config['schedule'] = {'monday': request.form['schedule-monday'],
+                            'tuesday': request.form['schedule-tuesday'],
+                            'wednesday': request.form['schedule-wednesday'],
+                            'thursday': request.form['schedule-thursday'],
+                            'friday': request.form['schedule-friday'],
+                            'saturday': request.form['schedule-saturday'],
+                            'sunday': request.form['schedule-sunday']}
+        theticketpost.settings.save_json("config", config)
 
     return render_template('settings.html', title='TheTicketPost', version=version, config=config)
 
@@ -53,11 +63,11 @@ def about():
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
 def save_or_get_settings(file):
 
-    if ( request.method == 'GET'):
+    if (request.method == 'GET'):
         json = theticketpost.settings.get_json(file)
         return jsonify(json)
 
-    if ( request.method == 'POST'):
+    if (request.method == 'POST'):
         content_type = request.headers.get('Content-Type')
         if (content_type == 'application/json'):
             json = request.json
@@ -68,4 +78,4 @@ def save_or_get_settings(file):
 
 
 def main():
-    app.run( host='0.0.0.0', port=8080 )
+    app.run(host='0.0.0.0', port=8080)

@@ -7,26 +7,71 @@
     <h1>Settings</h1>
 </div>
 <div class="container px-4">
-    <h4 class="mb-3">Printer settings</h4>
     <form action="{{ url_for('settings') }}" method="post">
+        <h4 class="mb-3">Printer settings</h4>
         <div class="row g-3">
             <div class="col-sm-6">
                 <label for="printer_dpi" class="form-label">dpi</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" id="printer_dpi" placeholder="" value="{{ config.printer_dpi }}" name="printer_dpi" required="">
+                    <input type="number" class="form-control" id="printer_dpi" placeholder=""
+                        value="{{ config.printer_dpi }}" name="printer_dpi" required="">
                     <span class="input-group-text">dpi</span>
                 </div>
             </div>
             <div class="col-sm-6">
                 <label for="printer_paper_width" class="form-label">Paper width</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" id="printer_paper_width" placeholder="" value="{{ config.printer_paper_width }}" name="printer_paper_width" required="">
+                    <input type="number" class="form-control" id="printer_paper_width" placeholder=""
+                        value="{{ config.printer_paper_width }}" name="printer_paper_width" required="">
                     <span class="input-group-text">mm</span>
                 </div>
             </div>
         </div>
         <hr class="my-4">
-        <button type="submit" class="w-100 btn btn-primary btn-lg"">Save settings</button>
+        <h4 class="mb-3">Printer Scheduler</h4>
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-monday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-monday">Monday</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-tuesday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-tuesday">Tuesday</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-wednesday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-wednesday">Wednesday</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-thursday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-thursday">Thursday</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-friday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-friday">Friday</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-saturday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-saturday">Saturday</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save-info-sunday"
+                        data-com.bitwarden.browser.user-edited="yes">
+                    <label class="form-check-label" for="save-info-sunday">Sunday</label>
+                </div>
+            </div>
+            <div class="col-sm-6">
+            </div>
+        </div>
+        <hr class="my-4">
+        <button type="submit" class="w-100 btn btn-primary btn-lg">Save settings</button>
     </form>
 </div>
 

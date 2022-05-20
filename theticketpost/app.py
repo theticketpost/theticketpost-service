@@ -1,14 +1,14 @@
 import theticketpost.settings
+import theticketpost.printer.ble
 
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
 version = '0.0.1'
+ble_scan_timout = 10
 
 # WEB SERVER METHODS
-
-
 @app.route('/')
 @app.route('/index')
 @app.route('/newspaper')
@@ -38,7 +38,6 @@ def settings():
     config = theticketpost.settings.get_json("config")
 
     if (request.method == 'POST'):
-        print(request.form)
         config['printer_dpi'] = int(request.form['printer_dpi'])
         config['printer_paper_width'] = int(request.form['printer_paper_width'])
         config['schedule'] = {'monday': 'schedule-monday' in request.form,
@@ -58,6 +57,7 @@ def about():
     return render_template('about.html', title='TheTicketPost', version=version)
 
 
+
 # API REST METHODS
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
 def save_or_get_settings(file):
@@ -74,6 +74,18 @@ def save_or_get_settings(file):
             return "200"
 
     return "500"
+
+
+@app.route('/api/printer/scan')
+async def scan_for_printers():
+    data = await theticketpost.printer.ble.scan_for_devices(ble_scan_timout)
+    return jsonify(data)
+
+
+@app.route('/api/printer/<string:address>/print')
+async def print_image(address):
+    data = await theticketpost.printer.ble.send_data(address, "")
+    return data
 
 
 def main():

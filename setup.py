@@ -22,6 +22,7 @@ setup(
     entry_points={"console_scripts": ["theticketpost-service = theticketpost.app:main"]},
     python_requires=">=3.7",
     install_requires=[
-        'flask',
+        'flask==2.1.2',
+        'bleak',
     ],
 )

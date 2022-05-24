@@ -3,16 +3,18 @@ const { createApp } = Vue
 const SettingsApp = {
     data() {
         return {
-            printer_dpi: 200,
-            printer_paper_width: 53,
-            schedule: {
-                monday: false,
-                tuesday: false,
-                wednesday: false,
-                thursday: false,
-                friday: false,
-                saturday: false,
-                sunday: false,
+            config: {
+                printer_dpi: 200,
+                printer_paper_width: 53,
+                schedule: {
+                    monday: false,
+                    tuesday: false,
+                    wednesday: false,
+                    thursday: false,
+                    friday: false,
+                    saturday: false,
+                    sunday: false,
+                }
             },
             scan_disabled: false,
             devices: [],
@@ -22,6 +24,29 @@ const SettingsApp = {
         await this.get_settings();
     },
     delimiters: ['{', '}'],
+    computed: {
+        monday_checked: function() {
+            return !this.config.schedule.monday;
+        },
+        tuesday_checked: function() {
+            return !this.config.schedule.tuesday;
+        },
+        wednesday_checked: function() {
+            return !this.config.schedule.wednesday;
+        },
+        thursday_checked: function() {
+            return !this.config.schedule.thursday;
+        },
+        friday_checked: function() {
+            return !this.config.schedule.friday;
+        },
+        saturday_checked: function() {
+            return !this.config.schedule.saturday;
+        },
+        sunday_checked: function() {
+            return !this.config.schedule.sunday;
+        }
+    },
     methods: {
         scan_for_devices: async function() {
             this.scan_disabled = true;

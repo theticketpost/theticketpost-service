@@ -23,6 +23,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         'flask==2.1.2',
+        'aioflask',
         'bleak',
     ],
 )

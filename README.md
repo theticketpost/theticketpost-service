@@ -3,6 +3,9 @@
 ## How to install
 
 ```bash
+$bash> sudo apt install python3-pip
+$bash> pip3 install setuptools
+
 # Virtual environment creation
 $bash> python -m venv .theticketpost
 $bash> source .theticketpost/bin/activate

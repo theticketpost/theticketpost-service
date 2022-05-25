@@ -14,7 +14,8 @@
                 <div class="col-sm-10">
                     <div class="form-group">
                         <label for="device_list">Device</label>
-                        <select class="form-select" id="exampleFormControlSelect1">
+                        <select class="form-select" id="deviceControlSelector" :disabled='devices == [] || scan_disabled'>
+                            <option v-if="selected_device" value="">{ selected_device.name } - { selected_device.address }</option>
                             <option v-for="device in devices" :value="device.address">
                               { device.name } - { device.address }
                             </option>

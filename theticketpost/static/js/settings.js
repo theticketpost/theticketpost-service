@@ -17,7 +17,8 @@ const SettingsApp = {
                 }
             },
             scan_disabled: false,
-            devices: [],
+            devices: [{"name": "patata", "address": "patata"}],
+            selected_device: null,
         }
     },
     async created() {
@@ -77,6 +78,10 @@ const SettingsApp = {
             });
 
             response.json().then( json => {
+                this.printer_dpi = json.printer_dpi;
+                this.printer_paper_width = json.printer_paper_width;
+                this.schedule = json.schedule;
+                this.selected_device = json.selected_device;
                 console.log(json);
             })
         }

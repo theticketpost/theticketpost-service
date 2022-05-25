@@ -17,7 +17,7 @@ const SettingsApp = {
                 }
             },
             scan_disabled: false,
-            devices: [{"name": "patata", "address": "patata"}],
+            devices: [],
             selected_device: null,
         }
     },

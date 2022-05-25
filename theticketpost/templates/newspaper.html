@@ -2,25 +2,6 @@
 
 {% block page %}
 <div id="newspaper-app">
-    <div id="newspaper" style="width: {{ paper_width}}px;">
-
-        <vuedraggable v-model="apps" item-key="id" class="list-group" @end="save_json()">
-            <template #item="{ element, index }">
-                <div class="card list-group-item">
-                    <div class="component card-body row justify-content-between">
-                        { element.title }
-                        <button type="submit" class="btn-close float-end" @click="del(index)"></button>
-                    </div>
-                </div>
-            </template>
-        </vuedraggable>
-
-    </div>
+    {% include 'ticket.html' %}
 </div>
-<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
-<script src="//cdn.jsdelivr.net/npm/sortablejs@1.10.2/Sortable.min.js"></script>
-<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
-<script src="//www.unpkg.com/vuedraggable@4.1.0/dist/vuedraggable.umd.js"></script>
-
-<script type="text/javascript" src="{{ url_for('static', filename='js/newspaper.js') }}"></script>
 {% endblock %}

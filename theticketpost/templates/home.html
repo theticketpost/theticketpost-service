@@ -31,58 +31,58 @@
     </symbol>
 </svg>
 
+<div id="newspaper-app">
+    <div class="p-5">
+        <div class="col mb-4">
+            <button type="button" class="btn btn-dark mx-1" @click="add('Image')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#card-image"></use>
+                </svg>
+                Image
+            </button>
+            <button type="button" class="btn btn-dark mx-1" @click="add('Text')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#card-text"></use>
+                </svg>
+                Text
+            </button>
+            <button type="button" class="btn btn-dark mx-1" @click="add('Weather')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#weather"></use>
+                </svg>
+                Weather
+            </button>
+            <button type="button" class="btn btn-dark mx-1" @click="add('Meetings')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#calendar"></use>
+                </svg>
+                Meetings
+            </button>
+            <button type="button" class="btn btn-dark mx-1" @click="add('Tasks')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#tasks"></use>
+                </svg>
+                Tasks
+            </button>
+            <button type="button" class="btn btn-dark mx-1" @click="add('Twitter')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#twitter"></use>
+                </svg>
+                Twitter
+            </button>
+            <button type="button" class="btn btn-dark mx-1" @click="add('Quotation')">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#quote"></use>
+                </svg>
+                Quotation
+            </button>
+        </div>
 
-<div class="p-5">
-    <div class="col mb-4">
-        <button type="button" class="btn btn-dark mx-1" @click="add('Image')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#card-image"></use>
-            </svg>
-            Image
-        </button>
-        <button type="button" class="btn btn-dark mx-1" @click="add('Text')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#card-text"></use>
-            </svg>
-            Text
-        </button>
-        <button type="button" class="btn btn-dark mx-1" @click="add('Weather')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#weather"></use>
-            </svg>
-            Weather
-        </button>
-        <button type="button" class="btn btn-dark mx-1" @click="add('Meetings')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#calendar"></use>
-            </svg>
-            Meetings
-        </button>
-        <button type="button" class="btn btn-dark mx-1" @click="add('Tasks')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#tasks"></use>
-            </svg>
-            Tasks
-        </button>
-        <button type="button" class="btn btn-dark mx-1" @click="add('Twitter')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#twitter"></use>
-            </svg>
-            Twitter
-        </button>
-        <button type="button" class="btn btn-dark mx-1" @click="add('Quotation')">
-            <svg class="bi me-2" width="16" height="16">
-                <use xlink:href="#quote"></use>
-            </svg>
-            Quotation
-        </button>
-    </div>
-
-    <div class="d-flex justify-content-center flex-nowrap">
-        {% if paper_width > 0 %}
-            {% include 'newspaper.html' %}
-        {% endif %}
+        <div class="d-flex justify-content-center flex-nowrap">
+            {% if paper_width > 0 %}
+                {% include 'ticket.html' %}
+            {% endif %}
+        </div>
     </div>
 </div>
-
 {% endblock %}

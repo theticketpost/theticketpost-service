@@ -24,6 +24,7 @@ setup(
     install_requires=[
         'flask==2.1.2',
         'aioflask',
+        'pyppeteer==1.0.2',
         'bleak',
     ],
 )

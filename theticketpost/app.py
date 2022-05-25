@@ -1,4 +1,5 @@
 import theticketpost.settings
+import theticketpost.newspaper
 import theticketpost.printer.ble
 
 from flask import Flask, render_template, request, jsonify
@@ -10,7 +11,17 @@ ble_scan_timout = 10
 
 # WEB SERVER METHODS
 @app.route('/')
-@app.route('/index')
+@app.route('/home')
+def home():
+    config = theticketpost.settings.get_json("config")
+    ticket_px_width = 0
+    if 'printer_dpi' in config and 'printer_paper_width' in config:
+        dpi = config['printer_dpi']
+        paper_width = config['printer_paper_width']
+        ticket_px_width = round(dpi * paper_width / 25.4)
+
+    return render_template('home.html', title='TheTicketPost', version=version, paper_width=ticket_px_width)
+
 @app.route('/newspaper')
 def newspaper():
     config = theticketpost.settings.get_json("config")
@@ -20,8 +31,7 @@ def newspaper():
         paper_width = config['printer_paper_width']
         ticket_px_width = round(dpi * paper_width / 25.4)
 
-    return render_template('newspaper.html', title='TheTicketPost', version=version, paper_width=ticket_px_width)
-
+    return render_template('newspaper.html', title='TheTicketPost', paper_width=ticket_px_width)
 
 @app.route('/apps')
 def apps():
@@ -84,6 +94,7 @@ async def scan_for_printers():
 
 @app.route('/api/printer/<string:address>/print')
 async def print_image(address):
+    theticketpost.newspaper.to_img('last_newspaper.png')
     data = await theticketpost.printer.ble.send_data(address, "")
     return data
 

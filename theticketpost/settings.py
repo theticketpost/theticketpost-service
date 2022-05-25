@@ -14,14 +14,13 @@ def get_json(file):
 
     check_and_create_dir()
     path_to_file = os.path.join(os.path.expanduser(settings_folder), file + ".json")
-    #print(path_to_file)
+
     if not os.path.exists(path_to_file):
         with open(path_to_file, 'w') as outfile:
             outfile.write('{}')
 
     with open(path_to_file) as json_file:
         data = json.load(json_file)
-        print(data)
 
     #print(data)
     return data

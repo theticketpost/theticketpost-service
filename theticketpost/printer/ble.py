@@ -25,9 +25,12 @@ async def scan_for_devices(timeout):
     scanner = BleakScanner()
     scanner.set_scanning_filter(filters={"UUIDs":POSSIBLE_SERVICE_UUIDS, "DuplicateData":False})
 
-    await scanner.start()
-    await asyncio.sleep(timeout)
-    await scanner.stop()
+    try:
+        await scanner.start()
+        await asyncio.sleep(timeout)
+        await scanner.stop()
+    except:
+        pass
 
     for d in scanner.discovered_devices:
         entry = {

@@ -43,23 +43,9 @@ def store():
     return render_template('store.html', title='TheTicketPost', version=version)
 
 
-@app.route('/settings', methods=['POST', 'GET'])
+@app.route('/settings')
 def settings():
-    config = theticketpost.settings.get_json("config")
-
-    if (request.method == 'POST'):
-        config['printer_dpi'] = int(request.form['printer_dpi'])
-        config['printer_paper_width'] = int(request.form['printer_paper_width'])
-        config['schedule'] = {'monday': 'schedule-monday' in request.form,
-                            'tuesday': 'schedule-tuesday' in request.form,
-                            'wednesday': 'schedule-wednesday' in request.form,
-                            'thursday': 'schedule-thursday' in request.form,
-                            'friday': 'schedule-friday' in request.form,
-                            'saturday': 'schedule-saturday' in request.form,
-                            'sunday': 'schedule-sunday' in request.form }
-        theticketpost.settings.save_json("config", config)
-
-    return render_template('settings.html', title='TheTicketPost', version=version, config=config)
+    return render_template('settings.html', title='TheTicketPost', version=version)
 
 
 @app.route('/about')

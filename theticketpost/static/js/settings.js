@@ -4,21 +4,23 @@ const SettingsApp = {
     data() {
         return {
             config: {
-                printer_dpi: 200,
-                printer_paper_width: 53,
+                printer: {
+                    device: null,
+                    dpi: 200,
+                    paper_width: 53,
+                },
                 schedule: {
-                    monday: false,
-                    tuesday: false,
-                    wednesday: false,
-                    thursday: false,
-                    friday: false,
-                    saturday: false,
-                    sunday: false,
-                }
+                    monday: { checked: false, time: "00:00" },
+                    tuesday: { checked: false, time: "00:00" },
+                    wednesday: { checked: false, time: "00:00" },
+                    thursday: { checked: false, time: "00:00" },
+                    friday: { checked: false, time: "00:00" },
+                    saturday: { checked: false, time: "00:00" },
+                    sunday: { checked: false, time: "00:00" },
+                },
             },
             scan_disabled: false,
             devices: [],
-            selected_device: null,
         }
     },
     async created() {
@@ -27,25 +29,25 @@ const SettingsApp = {
     delimiters: ['{', '}'],
     computed: {
         monday_checked: function() {
-            return !this.config.schedule.monday;
+            return !this.config.schedule.monday.checked;
         },
         tuesday_checked: function() {
-            return !this.config.schedule.tuesday;
+            return !this.config.schedule.tuesday.checked;
         },
         wednesday_checked: function() {
-            return !this.config.schedule.wednesday;
+            return !this.config.schedule.wednesday.checked;
         },
         thursday_checked: function() {
-            return !this.config.schedule.thursday;
+            return !this.config.schedule.thursday.checked;
         },
         friday_checked: function() {
-            return !this.config.schedule.friday;
+            return !this.config.schedule.friday.checked;
         },
         saturday_checked: function() {
-            return !this.config.schedule.saturday;
+            return !this.config.schedule.saturday.checked;
         },
         sunday_checked: function() {
-            return !this.config.schedule.sunday;
+            return !this.config.schedule.sunday.checked;
         }
     },
     methods: {
@@ -69,8 +71,10 @@ const SettingsApp = {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                //body: JSON.stringify(this)
+                body: JSON.stringify(this.config)
             });
+
+            console.log( JSON.stringify(this.config) );
         },
         get_settings: async function() {
             const response = await fetch('/api/settings/config', {
@@ -78,11 +82,8 @@ const SettingsApp = {
             });
 
             response.json().then( json => {
-                this.printer_dpi = json.printer_dpi;
-                this.printer_paper_width = json.printer_paper_width;
-                this.schedule = json.schedule;
-                this.selected_device = json.selected_device;
-                console.log(json);
+                this.config = Object.assign( this.config, json);
+                console.log(this.config);
             })
         }
     }

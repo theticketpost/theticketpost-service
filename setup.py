@@ -26,5 +26,6 @@ setup(
         'aioflask',
         'pyppeteer==1.0.2',
         'bleak',
+        'loguru',
     ],
 )

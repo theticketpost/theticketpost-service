@@ -4,6 +4,7 @@ from bleak import BleakClient, BleakScanner
 from bleak.backends.scanner import AdvertisementData
 from bleak.backends.device import BLEDevice
 
+from loguru import logger
 
 POSSIBLE_SERVICE_UUIDS = [
     '0000ae30-0000-1000-8000-00805f9b34fb',
@@ -26,6 +27,7 @@ async def scan_for_devices(timeout):
     scanner.set_scanning_filter(filters={"UUIDs":POSSIBLE_SERVICE_UUIDS, "DuplicateData":False})
 
     try:
+        logger.info("Scanning for BLE devices")
         await scanner.start()
         await asyncio.sleep(timeout)
         await scanner.stop()

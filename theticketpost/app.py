@@ -1,8 +1,11 @@
 import theticketpost.settings
 import theticketpost.newspaper
+import theticketpost.logger
 import theticketpost.printer.ble
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, Response, render_template, request, jsonify
+
+from loguru import logger
 
 app = Flask(__name__)
 
@@ -61,6 +64,11 @@ def about():
 
 
 # API REST METHODS
+@app.route('/api/log_stream')
+def log_stream():
+    return Response(theticketpost.logger.log_stream(), mimetype="text/plain", content_type="text/event-stream")
+
+
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
 def save_or_get_settings(file):
 
@@ -97,4 +105,5 @@ def main():
     if 'webserver' in config and 'port' in config['webserver']:
         port = config['webserver']['port']
 
+    logger.info( "Starting webserver on port: " + str(port) )
     app.run(host='0.0.0.0', port=port)

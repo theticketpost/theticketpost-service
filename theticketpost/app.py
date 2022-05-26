@@ -15,9 +15,9 @@ ble_scan_timout = 10
 def home():
     config = theticketpost.settings.get_json("config")
     ticket_px_width = 0
-    if 'printer_dpi' in config and 'printer_paper_width' in config:
-        dpi = config['printer_dpi']
-        paper_width = config['printer_paper_width']
+    if 'printer' in config and 'dpi' in config['printer'] and 'paper_width' in config['printer']:
+        dpi = config['printer']['dpi']
+        paper_width = config['printer']['paper_width']
         ticket_px_width = round(dpi * paper_width / 25.4)
 
     return render_template('home.html', title='TheTicketPost', version=version, paper_width=ticket_px_width)
@@ -26,9 +26,9 @@ def home():
 def newspaper():
     config = theticketpost.settings.get_json("config")
     ticket_px_width = 0
-    if 'printer_dpi' in config and 'printer_paper_width' in config:
-        dpi = config['printer_dpi']
-        paper_width = config['printer_paper_width']
+    if 'printer' in config and 'dpi' in config['printer'] and 'paper_width' in config['printer']:
+        dpi = config['printer']['dpi']
+        paper_width = config['printer']['paper_width']
         ticket_px_width = round(dpi * paper_width / 25.4)
 
     return render_template('newspaper.html', title='TheTicketPost', paper_width=ticket_px_width)

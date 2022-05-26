@@ -4,19 +4,22 @@ const SettingsApp = {
     data() {
         return {
             config: {
+                webserver: {
+                    port: 8080,
+                },
                 printer: {
                     device: null,
                     dpi: 200,
                     paper_width: 53,
                 },
                 schedule: {
-                    monday: { checked: false, time: "00:00" },
-                    tuesday: { checked: false, time: "00:00" },
-                    wednesday: { checked: false, time: "00:00" },
-                    thursday: { checked: false, time: "00:00" },
-                    friday: { checked: false, time: "00:00" },
-                    saturday: { checked: false, time: "00:00" },
-                    sunday: { checked: false, time: "00:00" },
+                    monday: { active: false, time: "00:00" },
+                    tuesday: { active: false, time: "00:00" },
+                    wednesday: { active: false, time: "00:00" },
+                    thursday: { active: false, time: "00:00" },
+                    friday: { active: false, time: "00:00" },
+                    saturday: { active: false, time: "00:00" },
+                    sunday: { active: false, time: "00:00" },
                 },
             },
             scan_disabled: false,
@@ -28,26 +31,26 @@ const SettingsApp = {
     },
     delimiters: ['{', '}'],
     computed: {
-        monday_checked: function() {
-            return !this.config.schedule.monday.checked;
+        monday_active: function() {
+            return !this.config.schedule.monday.active;
         },
-        tuesday_checked: function() {
-            return !this.config.schedule.tuesday.checked;
+        tuesday_active: function() {
+            return !this.config.schedule.tuesday.active;
         },
-        wednesday_checked: function() {
-            return !this.config.schedule.wednesday.checked;
+        wednesday_active: function() {
+            return !this.config.schedule.wednesday.active;
         },
-        thursday_checked: function() {
-            return !this.config.schedule.thursday.checked;
+        thursday_active: function() {
+            return !this.config.schedule.thursday.active;
         },
-        friday_checked: function() {
-            return !this.config.schedule.friday.checked;
+        friday_active: function() {
+            return !this.config.schedule.friday.active;
         },
-        saturday_checked: function() {
-            return !this.config.schedule.saturday.checked;
+        saturday_active: function() {
+            return !this.config.schedule.saturday.active;
         },
-        sunday_checked: function() {
-            return !this.config.schedule.sunday.checked;
+        sunday_active: function() {
+            return !this.config.schedule.sunday.active;
         }
     },
     methods: {

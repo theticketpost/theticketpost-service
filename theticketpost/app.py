@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 version = '0.0.1'
 ble_scan_timout = 10
+port = 8080
 
 # WEB SERVER METHODS
 @app.route('/')
@@ -80,10 +81,15 @@ async def scan_for_printers():
 
 @app.route('/api/printer/<string:address>/print')
 async def print_image(address):
-    theticketpost.newspaper.to_img('last_newspaper.png')
+    theticketpost.newspaper.to_img('last_newspaper.png', port)
     data = await theticketpost.printer.ble.send_data(address, "")
     return data
 
 
 def main():
-    app.run(host='0.0.0.0', port=8080)
+    port = 8080
+    config = theticketpost.settings.get_json("config")
+    if 'webserver' in config and 'port' in config['webserver']:
+        port = config['webserver']['port']
+
+    app.run(host='0.0.0.0', port=port)

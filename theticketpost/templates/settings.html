@@ -9,7 +9,7 @@
     </div>
     <div class="container px-4">
         <form>
-            <h4 class="mb-3">Printer settings</h4>
+            <h4 class="mb-3">Printer</h4>
             <div class="row mb-3">
                 <div class="col-sm-10">
                     <div class="form-group">
@@ -55,84 +55,84 @@
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-monday" v-model="config.schedule.monday.checked" >
+                                <input type="checkbox" class="form-check-input" id="schedule-monday" v-model="config.schedule.monday.active" >
                                 <label class="form-check-label" for="schedule-monday">Monday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='monday_checked' v-model="config.schedule.monday.time" >
+                            <input type="time" :disabled='monday_active' v-model="config.schedule.monday.time" >
                         </div>
                     </div>
 
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-tuesday" v-model="config.schedule.tuesday.checked" >
+                                <input type="checkbox" class="form-check-input" id="schedule-tuesday" v-model="config.schedule.tuesday.active" >
                                 <label class="form-check-label" for="schedule-tuesday">Tuesday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='tuesday_checked' v-model="config.schedule.tuesday.time" >
+                            <input type="time" :disabled='tuesday_active' v-model="config.schedule.tuesday.time" >
                         </div>
                     </div>
 
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-wednesday" v-model="config.schedule.wednesday.checked" >
+                                <input type="checkbox" class="form-check-input" id="schedule-wednesday" v-model="config.schedule.wednesday.active" >
                                 <label class="form-check-label" for="schedule-wednesday">Wednesday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='wednesday_checked' v-model="config.schedule.wednesday.time" >
+                            <input type="time" :disabled='wednesday_active' v-model="config.schedule.wednesday.time" >
                         </div>
                     </div>
 
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-thursday" v-model="config.schedule.thursday.checked" >
+                                <input type="checkbox" class="form-check-input" id="schedule-thursday" v-model="config.schedule.thursday.active" >
                                 <label class="form-check-label" for="schedule-thursday">Thursday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='thursday_checked' v-model="config.schedule.thursday.time" >
+                            <input type="time" :disabled='thursday_active' v-model="config.schedule.thursday.time" >
                         </div>
                     </div>
 
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-friday" v-model="config.schedule.friday.checked" >
+                                <input type="checkbox" class="form-check-input" id="schedule-friday" v-model="config.schedule.friday.active" >
                                 <label class="form-check-label" for="schedule-friday">Friday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='friday_checked' v-model="config.schedule.friday.time" >
+                            <input type="time" :disabled='friday_active' v-model="config.schedule.friday.time" >
                         </div>
                     </div>
 
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-saturday" v-model="config.schedule.saturday.checked">
+                                <input type="checkbox" class="form-check-input" id="schedule-saturday" v-model="config.schedule.saturday.active">
                                 <label class="form-check-label" for="schedule-saturday">Saturday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='saturday_checked' v-model="config.schedule.saturday.time" >
+                            <input type="time" :disabled='saturday_active' v-model="config.schedule.saturday.time" >
                         </div>
                     </div>
 
                     <div class="row mb-1">
                         <div class="col-sm-4">
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-sunday" v-model="config.schedule.sunday.checked">
+                                <input type="checkbox" class="form-check-input" id="schedule-sunday" v-model="config.schedule.sunday.active">
                                 <label class="form-check-label" for="schedule-sunday">Sunday</label>
                             </div>
                         </div>
                         <div class="col">
-                            <input type="time" :disabled='sunday_checked' v-model="config.schedule.sunday.time" >
+                            <input type="time" :disabled='sunday_active' v-model="config.schedule.sunday.time" >
                         </div>
                     </div>
 
@@ -140,8 +140,19 @@
                 <div class="col-sm-6">
                 </div>
             </div>
+
             <hr class="my-4">
-            <button type="button" class="w-100 btn btn-primary btn-lg" @click="save_settings()">Save settings</button>
+            <h4 class="mb-3">Webserver</h4>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    <label for="port" class="form-label">Port</label>
+                    <input type="number" class="form-control" id="port" placeholder=""
+                            v-model="config.webserver.port" >
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <button type="button" class="w-100 btn btn-primary btn-lg mb-3" @click="save_settings()">Save settings</button>
         </form>
     </div>
 </div>

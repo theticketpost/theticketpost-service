@@ -49,6 +49,11 @@ def settings():
     return render_template('settings.html', title='TheTicketPost', version=version)
 
 
+@app.route('/log')
+def log():
+    return render_template('log.html', title='TheTicketPost', version=version)
+
+
 @app.route('/about')
 def about():
     return render_template('about.html', title='TheTicketPost', version=version)
@@ -80,7 +85,7 @@ async def scan_for_printers():
 
 
 @app.route('/api/printer/<string:address>/print')
-async def print_image(address):
+async def print_newspaper(address):
     theticketpost.newspaper.to_img('last_newspaper.png', port)
     data = await theticketpost.printer.ble.send_data(address, "")
     return data

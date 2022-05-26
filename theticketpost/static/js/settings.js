@@ -85,6 +85,8 @@ const SettingsApp = {
 
             response.json().then( json => {
                 this.config = Object.assign( this.config, json);
+                if (this.config.printer.device)
+                    this.devices.push( this.config.printer.device );
             })
         }
     }

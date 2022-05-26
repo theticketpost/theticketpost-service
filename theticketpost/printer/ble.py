@@ -35,7 +35,6 @@ async def scan_for_devices(timeout):
     for d in scanner.discovered_devices:
         entry = {
             "name": d.name,
-            "rssi": d.rssi,
             "address": d.address,
         }
         device_ids.append(entry)

@@ -74,7 +74,6 @@ const SettingsApp = {
                 body: JSON.stringify(this.config)
             });
 
-            console.log( JSON.stringify(this.config) );
         },
         get_settings: async function() {
             const response = await fetch('/api/settings/config', {
@@ -83,7 +82,6 @@ const SettingsApp = {
 
             response.json().then( json => {
                 this.config = Object.assign( this.config, json);
-                console.log(this.config);
             })
         }
     }

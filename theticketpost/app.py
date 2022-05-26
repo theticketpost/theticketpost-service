@@ -64,10 +64,14 @@ def about():
 
 
 # API REST METHODS
-@app.route('/api/log_stream')
+@app.route('/api/log/stream')
 def log_stream():
-    return Response(theticketpost.logger.log_stream(), mimetype="text/plain", content_type="text/event-stream")
+    return Response(theticketpost.logger.stream(), mimetype="text/plain", content_type="text/event-stream")
 
+@app.route('/api/log/clear')
+def log_clear():
+    theticketpost.logger.clear()
+    return "200"
 
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
 def save_or_get_settings(file):

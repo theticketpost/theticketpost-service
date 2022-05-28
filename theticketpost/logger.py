@@ -16,5 +16,5 @@ def stream():
             yield data.encode()
             sleep(1)
 
-def reset():
+def clear():
     open(log_path, 'w').close()

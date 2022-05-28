@@ -1,6 +1,11 @@
 const { createApp } = Vue
 
 const LogApp = {
+    data() {
+        return {
+            autoscroll: true
+        }
+    },
     async created() {
         await this.get_log_stream();
     },
@@ -19,15 +24,21 @@ const LogApp = {
               let string = new TextDecoder().decode(value);
               var element = document.getElementById("output");
               element.textContent += string;
-              element.scrollTop = element.scrollHeight;
+              if (this.autoscroll)
+                element.scrollTop = element.scrollHeight;
             }
 
             console.log('Response fully received');
         },
-        reset_log: async function()  {
-            const response = await fetch('/api/log/reset', {
+        clear_log: async function()  {
+            const response = await fetch('/api/log/clear', {
                 method: 'GET'
             });
+
+            var element = document.getElementById("output");
+            element.textContent = "";
+
+            await this.get_log_stream();
         }
     }
 

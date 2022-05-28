@@ -75,9 +75,9 @@ def about():
 def log_stream():
     return Response(theticketpost.logger.stream(), mimetype="text/plain", content_type="text/event-stream")
 
-@app.route('/api/log/reset')
+@app.route('/api/log/clear')
 def log_clear():
-    theticketpost.logger.reset()
+    theticketpost.logger.clear()
     return "200"
 
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])

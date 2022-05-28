@@ -17,6 +17,7 @@ port = 8080
 @app.route('/')
 @app.route('/home')
 def home():
+    logger.info("Serving home page")
     config = theticketpost.settings.get_json("config")
     ticket_px_width = 0
     if 'printer' in config and 'dpi' in config['printer'] and 'paper_width' in config['printer']:
@@ -28,6 +29,7 @@ def home():
 
 @app.route('/newspaper')
 def newspaper():
+    logger.info("Serving newspaper page")
     config = theticketpost.settings.get_json("config")
     ticket_px_width = 0
     if 'printer' in config and 'dpi' in config['printer'] and 'paper_width' in config['printer']:
@@ -39,26 +41,31 @@ def newspaper():
 
 @app.route('/apps')
 def apps():
+    logger.info("Serving apps page")
     return render_template('apps.html', title='TheTicketPost', version=version)
 
 
 @app.route('/store')
 def store():
+    logger.info("Serving store page")
     return render_template('store.html', title='TheTicketPost', version=version)
 
 
 @app.route('/settings')
 def settings():
+    logger.info("Serving settings page")
     return render_template('settings.html', title='TheTicketPost', version=version)
 
 
 @app.route('/log')
 def log():
+    logger.info("Serving log page")
     return render_template('log.html', title='TheTicketPost', version=version)
 
 
 @app.route('/about')
 def about():
+    logger.info("Serving about page")
     return render_template('about.html', title='TheTicketPost', version=version)
 
 
@@ -68,9 +75,9 @@ def about():
 def log_stream():
     return Response(theticketpost.logger.stream(), mimetype="text/plain", content_type="text/event-stream")
 
-@app.route('/api/log/clear')
+@app.route('/api/log/reset')
 def log_clear():
-    theticketpost.logger.clear()
+    theticketpost.logger.reset()
     return "200"
 
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])

@@ -14,12 +14,14 @@ def get_storage_path():
 
 
 def get_json(file):
+    logger.info("Retrieving data from " + file + " file")
     data = {}
 
     check_and_create_dir()
     path_to_file = os.path.join(get_storage_path(), file + ".json")
 
     if not os.path.exists(path_to_file):
+        logger.warning("File for " + file + " does not exists. Created an empty file")
         with open(path_to_file, 'w') as outfile:
             outfile.write('{}')
 
@@ -30,6 +32,7 @@ def get_json(file):
 
 
 def save_json(file, data):
+    logger.info("Updating data from " + file + " file")
     check_and_create_dir()
     path_to_file = os.path.join(os.path.expanduser(settings_folder), file + ".json")
 
@@ -38,6 +41,7 @@ def save_json(file, data):
 
 
 def save_value( file, key, value ):
+    logger.info("Updating value for key==" + key + " from " + file + " file")
     data = get_json( file )
     data[key] = value
     save_json( file, data )

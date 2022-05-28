@@ -3,12 +3,9 @@
 {% set active_page = 'log' %}
 
 {% block content %}
-<div class="p-5">
-    <h1 class="text-center">Log</h1>
-    <div class="container px-4">
-        <div id="log-app">
-            <pre id="output" class="text-left"></pre>
-        </div>
+<div id="log-app" class="h-100">
+    <div class="p-5 h-100">
+        <pre id="output" class="row text-left bg-dark text-light p-4 h-100 overflow-auto"></pre>
     </div>
 </div>
 

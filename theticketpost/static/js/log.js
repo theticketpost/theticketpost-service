@@ -1,17 +1,12 @@
 const { createApp } = Vue
 
 const LogApp = {
-    data() {
-        return {
-            log: ""
-        }
-    },
     async created() {
-        await this.get_stream();
+        await this.get_log_stream();
     },
     delimiters: ['{', '}'],
     methods: {
-        get_stream: async function() {
+        get_log_stream: async function() {
             const response = await fetch('/api/log/stream', {
                 method: 'GET'
             });
@@ -22,10 +17,17 @@ const LogApp = {
               if (done) break;
 
               let string = new TextDecoder().decode(value);
-              document.getElementById("output").textContent += string;
+              var element = document.getElementById("output");
+              element.textContent += string;
+              element.scrollTop = element.scrollHeight;
             }
 
             console.log('Response fully received');
+        },
+        reset_log: async function()  {
+            const response = await fetch('/api/log/reset', {
+                method: 'GET'
+            });
         }
     }
 

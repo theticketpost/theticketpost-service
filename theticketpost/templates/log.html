@@ -4,7 +4,7 @@
 
 {% block content %}
 <div id="log-app" class="h-100">
-    <div class="p-5 col h-100">
+    <div class="p-5 col container-fluid d-flex h-100 flex-column h-100">
         <div class="row">
             <div class="col d-flex justify-content-end px-0 my-1">
                 <button class="btn btn-primary align-self-end mx-1" type="button" @click="autoscroll = !autoscroll">
@@ -15,7 +15,7 @@
                 </button>
             </div>
         </div>
-        <pre id="output" class="row text-left bg-dark text-light p-4 h-75 overflow-auto"></pre>
+        <pre id="output" class="row text-left bg-dark text-light p-4 overflow-auto"></pre>
     </div>
 </div>
 

@@ -14,7 +14,6 @@ def get_storage_path():
 
 
 def get_json(file):
-    logger.info("Retrieving data from " + file + " file")
     data = {}
 
     check_and_create_dir()
@@ -32,7 +31,6 @@ def get_json(file):
 
 
 def save_json(file, data):
-    logger.info("Updating data from " + file + " file")
     check_and_create_dir()
     path_to_file = os.path.join(os.path.expanduser(settings_folder), file + ".json")
 
@@ -41,7 +39,6 @@ def save_json(file, data):
 
 
 def save_value( file, key, value ):
-    logger.info("Updating value for key==" + key + " from " + file + " file")
     data = get_json( file )
     data[key] = value
     save_json( file, data )

@@ -2,20 +2,30 @@ import asyncio
 from pyppeteer import launch
 
 async def to_img_thread(path, port):
+
     # launch chromium browser in the background
-    browser = await launch()
+    browser = await launch(
+        handleSIGINT=False,
+        handleSIGTERM=False,
+        handleSIGHUP=False
+    )
     # open a new tab in the browser
     page = await browser.newPage()
     # add URL to a new page and then open it
     await page.goto("http://localhost:" + str(port) + "/newspaper")
 
+    await page.waitForSelector("#newspaper", { "visible": True })
+
     dimensions = await page.evaluate('''() => {
+
         return {
             width: document.getElementById("newspaper").offsetWidth,
             height: document.getElementById("newspaper").offsetHeight,
             deviceScaleFactor: window.devicePixelRatio,
         }
     }''')
+
+    print(dimensions)
 
     await page.setViewport(dimensions)
 

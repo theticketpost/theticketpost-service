@@ -79,10 +79,12 @@
         </div>
 
         <div class="d-flex justify-content-center flex-nowrap">
-            {% if paper_width > 0 %}
-                {% include 'ticket.html' %}
-            {% endif %}
+            {% include 'ticket.html' %}
         </div>
+
+        <hr class="my-4">
+        <button v-if="device" type="button" class="w-100 btn btn-primary btn-lg mb-3" @click="print()">Print</button>
+
     </div>
 </div>
 

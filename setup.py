@@ -27,5 +27,6 @@ setup(
         'pyppeteer==1.0.2',
         'bleak',
         'loguru',
+        'nest_asyncio'
     ],
 )

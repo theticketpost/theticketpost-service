@@ -7,6 +7,10 @@ from flask import Flask, Response, render_template, request, jsonify
 
 from loguru import logger
 
+import os
+import nest_asyncio
+nest_asyncio.apply()
+
 app = Flask(__name__)
 
 version = '0.0.1'
@@ -17,55 +21,34 @@ port = 8080
 @app.route('/')
 @app.route('/home')
 def home():
-    logger.info("Serving home page")
-    config = theticketpost.settings.get_json("config")
-    ticket_px_width = 0
-    if 'printer' in config and 'dpi' in config['printer'] and 'paper_width' in config['printer']:
-        dpi = config['printer']['dpi']
-        paper_width = config['printer']['paper_width']
-        ticket_px_width = round(dpi * paper_width / 25.4)
-
-    return render_template('home.html', title='TheTicketPost', version=version, paper_width=ticket_px_width)
+    return render_template('home.html', title='TheTicketPost', version=version )
 
 @app.route('/newspaper')
 def newspaper():
-    logger.info("Serving newspaper page")
-    config = theticketpost.settings.get_json("config")
-    ticket_px_width = 0
-    if 'printer' in config and 'dpi' in config['printer'] and 'paper_width' in config['printer']:
-        dpi = config['printer']['dpi']
-        paper_width = config['printer']['paper_width']
-        ticket_px_width = round(dpi * paper_width / 25.4)
-
-    return render_template('newspaper.html', title='TheTicketPost', paper_width=ticket_px_width)
+    return render_template('newspaper.html', title='TheTicketPost')
 
 @app.route('/apps')
 def apps():
-    logger.info("Serving apps page")
     return render_template('apps.html', title='TheTicketPost', version=version)
 
 
 @app.route('/store')
 def store():
-    logger.info("Serving store page")
     return render_template('store.html', title='TheTicketPost', version=version)
 
 
 @app.route('/settings')
 def settings():
-    logger.info("Serving settings page")
     return render_template('settings.html', title='TheTicketPost', version=version)
 
 
 @app.route('/log')
 def log():
-    logger.info("Serving log page")
     return render_template('log.html', title='TheTicketPost', version=version)
 
 
 @app.route('/about')
 def about():
-    logger.info("Serving about page")
     return render_template('about.html', title='TheTicketPost', version=version)
 
 
@@ -105,16 +88,20 @@ async def scan_for_printers():
 
 @app.route('/api/printer/<string:address>/print')
 async def print_newspaper(address):
-    theticketpost.newspaper.to_img('last_newspaper.png', port)
-    data = await theticketpost.printer.ble.send_data(address, "")
-    return data
+    logger.info("Printing ticket on " + address)
+    path = os.path.join(theticketpost.settings.get_storage_path(), 'last_newspaper.png')
+    theticketpost.newspaper.to_img(path, port)
+    logger.info("Ticket rendered on " + path)
+    return "200"
+    #data = await theticketpost.printer.ble.send_data(address, "")
+    #return data
 
 
 def main():
-    port = 8080
+    global port
     config = theticketpost.settings.get_json("config")
     if 'webserver' in config and 'port' in config['webserver']:
         port = config['webserver']['port']
 
     logger.info( "Starting webserver on port: " + str(port) )
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=port)

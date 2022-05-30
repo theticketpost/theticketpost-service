@@ -91,7 +91,7 @@ async def print_newspaper(address):
     logger.info("Printing ticket on " + address)
     path = os.path.join(theticketpost.settings.get_storage_path(), 'last_newspaper.png')
     theticketpost.newspaper.to_img(path, port)
-    logger.info("Ticket rendered on " + path)
+    logger.info("Ticket rendered and saved in folder " + path)
     return "200"
     #data = await theticketpost.printer.ble.send_data(address, "")
     #return data

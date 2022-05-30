@@ -30,12 +30,17 @@ Open a browser and navigates to `localhost:8080`
 
 You can find the mockup [here](https://mydraft.cc/c9t85hh6j4edn171387g)
 
-## pageres
+## Raspberry Pi
+
+Tested on RaspberryPi 3 with Raspberry Pi OS Lite (64-bit) Debian Bullseye 
 
 ```bash
-$bash> sudo apt install nodejs npm chromium-browser
-$bash> sudo npm install --global pageres-cli
-$bash> pageres http://localhost:8080 1920x8000 --selector=div#newspaper --overwrite --filename=last_newspaper
+$bash> sudo apt update
+$bash> sudo apt upgrade
+$bash> sudo apt install git python3-pip chromium-browser
+$bash> pip3 install setuptools
+$bash> git clone https://github.com/theticketpost/theticketpost-service.git
+$bash> cd theticketpost-service
+$bash> python3 setup.py install --record files.txt
 ```
-
-[Pageres Github](https://github.com/sindresorhus/pageres-cli)
+For fix `OSError: [Errno 8] Exec format error: '/home/pi/.local/share/pyppeteer/local-chromium/575458/chrome-linux/chrome'` -> [pyppetter issue 250](https://github.com/miyakogi/pyppeteer/issues/250)

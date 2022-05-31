@@ -48,10 +48,12 @@ def to_img(path, port):
 def print(address, port):
     path = os.path.join(theticketpost.settings.get_storage_path(), 'last_newspaper.png')
     to_img(path, port)
+    logger.info("Ticket rendered and saved in folder " + path)
+
     with Image.open(path) as img:
         dithered = img.convert("1")
-        dithered.save("test", "PNG")
-        data = theticketpost.printer.cmd.cmds_print_img( dithered, False )
-        await theticketpost.printer.ble.send_data(address, data)
-
-    logger.info("Ticket rendered and saved in folder " + path)
+        logger.info("Applied Floyd-Steinberg dither...")
+        data = theticketpost.printer.cmd.cmds_print_img( dithered, True )
+        loop = asyncio.get_event_loop()
+        logger.info("Sending commands to device with address==" + address)
+        loop.run_until_complete(theticketpost.printer.ble.send_data(address, data))

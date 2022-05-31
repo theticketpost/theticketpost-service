@@ -2,6 +2,7 @@ import theticketpost.settings
 import theticketpost.newspaper
 import theticketpost.logger
 import theticketpost.printer.ble
+import theticketpost.scheduler
 
 from flask import Flask, Response, render_template, request, jsonify
 
@@ -75,6 +76,7 @@ def save_or_get_settings(file):
         if (content_type == 'application/json'):
             json = request.json
             theticketpost.settings.save_json(file, json)
+            ttp_scheduler.set_schedule(json)
             return "200"
 
     return "500"
@@ -102,6 +104,10 @@ def main():
     config = theticketpost.settings.get_json("config")
     if 'webserver' in config and 'port' in config['webserver']:
         port = config['webserver']['port']
+        
+    global ttp_scheduler
+    ttp_scheduler = theticketpost.scheduler.Scheduler(config)
+    ttp_scheduler.start()
 
     logger.info( "Starting webserver on port: " + str(port) )
     app.run(debug=False, use_reloader=False, host='0.0.0.0', port=port)

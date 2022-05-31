@@ -58,8 +58,8 @@ async def send_data(address, data):
         async with BleakClient(address) as client:
             chunk_size = client.mtu_size - 3
             # chunkify data and send to the client
-            #for i, chunk in enumerate(chunkify(data, chunk_size)):
-            #    await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk)
+            for i, chunk in enumerate(chunkify(data, chunk_size)):
+               await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk)
 
             await asyncio.sleep(WAIT_AFTER_DATA_SENT_S)
             return "Send data finished: " + str(client.is_connected) + " MTU: " + str(client.mtu_size)

@@ -1,4 +1,11 @@
 from setuptools import find_packages, setup
+from setuptools.command.install import install
+from subprocess import check_call
+
+class PreInstallCommand(install):
+    def run(self):
+        check_call("echo testing...".split())
+        install.run(self)
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -27,6 +34,7 @@ setup(
         'pyppeteer==1.0.2',
         'bleak',
         'loguru',
-        'nest_asyncio'
-    ],
+        'nest_asyncio',
+        'Pillow'
+    ]
 )

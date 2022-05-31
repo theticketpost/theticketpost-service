@@ -1,4 +1,4 @@
-import theticketpost.settings
+
 import theticketpost.newspaper
 import theticketpost.logger
 import theticketpost.printer.ble
@@ -89,12 +89,8 @@ async def scan_for_printers():
 @app.route('/api/printer/<string:address>/print')
 async def print_newspaper(address):
     logger.info("Printing ticket on " + address)
-    path = os.path.join(theticketpost.settings.get_storage_path(), 'last_newspaper.png')
-    theticketpost.newspaper.to_img(path, port)
-    logger.info("Ticket rendered and saved in folder " + path)
+    theticketpost.newspaper.print(address, port)
     return "200"
-    #data = await theticketpost.printer.ble.send_data(address, "")
-    #return data
 
 
 def main():

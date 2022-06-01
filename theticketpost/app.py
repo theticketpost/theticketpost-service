@@ -90,6 +90,7 @@ async def scan_for_printers():
 async def print_newspaper(address):
     logger.info("Printing ticket on " + address)
     theticketpost.newspaper.print(address, port)
+    logger.info("Print finished")
     return "200"
 
 

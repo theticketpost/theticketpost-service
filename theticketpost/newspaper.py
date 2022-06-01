@@ -51,9 +51,10 @@ def print(address, port):
     logger.info("Ticket rendered and saved in folder " + path)
 
     with Image.open(path) as img:
+        # width 384 dots
+        img = img.resize(size=(384, int(img.height * 384 / img.width)))
         dithered = img.convert("1")
         logger.info("Applied Floyd-Steinberg dither...")
-        data = theticketpost.printer.cmd.cmds_print_img( dithered, True )
+        data = theticketpost.printer.cmd.cmds_print_img( dithered )
         loop = asyncio.get_event_loop()
-        logger.info("Sending commands to device with address==" + address)
         loop.run_until_complete(theticketpost.printer.ble.send_data(address, data))

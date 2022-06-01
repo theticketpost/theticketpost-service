@@ -19,7 +19,6 @@ TX_CHARACTERISTIC_UUID = '0000ff02-0000-1000-8000-00805f9b34fb'
 WAIT_AFTER_DATA_SENT_S = 30
 
 
-
 async def scan_for_devices(timeout):
     device_ids = []
 
@@ -44,7 +43,6 @@ async def scan_for_devices(timeout):
     return device_ids
 
 
-
 def chunkify(data, chunk_size):
     return (
         data[i: i + chunk_size] for i in range(0, len(data), chunk_size)
@@ -54,6 +52,7 @@ def chunkify(data, chunk_size):
 async def send_data(address, data):
 
     try:
+        logger.info("Connecting to device with address==" + address + " ...")
         async with BleakClient(address) as client:
             logger.info("Connected to device with address==" + address + " MTU: " + str(client.mtu_size))
             chunk_size = client.mtu_size - 3
@@ -88,13 +87,13 @@ async def send_data(address, data):
             # DEBUG INFO END
 
             # chunkify data and send to the client
-            print(enumerate(chunkify(data, chunk_size)))
+            logger.info("Sending commands to device with address==" + address)
             for i, chunk in enumerate(chunkify(data, chunk_size)):
-                await client.write_gatt_char(TX_CHARACTERISTIC_UUID, data)
+                await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk)
 
             await asyncio.sleep(WAIT_AFTER_DATA_SENT_S)
 
             logger.info("Send data finished: " + str(client.is_connected) + " MTU: " + str(client.mtu_size))
 
-    except:
-        logger.error("Not able to connect to device with address==" + address)
+    except Exception as e:
+        logger.error(str(e))

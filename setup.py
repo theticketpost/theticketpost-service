@@ -35,6 +35,7 @@ setup(
         'bleak',
         'loguru',
         'nest_asyncio',
-        'Pillow'
-    ]
+        'Pillow',
+        'schedule',
+    ],
 )

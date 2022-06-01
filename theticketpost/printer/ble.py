@@ -5,6 +5,7 @@ from bleak.backends.scanner import AdvertisementData
 from bleak.backends.device import BLEDevice
 
 from loguru import logger
+from waiting import wait
 
 POSSIBLE_SERVICE_UUIDS = [
     '0000ae30-0000-1000-8000-00805f9b34fb',
@@ -12,11 +13,7 @@ POSSIBLE_SERVICE_UUIDS = [
 ]
 
 TX_CHARACTERISTIC_UUID = '0000ff02-0000-1000-8000-00805f9b34fb'
-
-# This is a hacky solution so we don't terminate the BLE connection to the printer
-# while it's still printing. A better solution is to subscribe to the RX characteristic
-# and listen for printer events, so we know exactly when the printing is finished.
-WAIT_AFTER_DATA_SENT_S = 30
+NOTIFICATION_CHARACTERISTIC_UUI = '0000ff03-0000-1000-8000-00805f9b34fb'
 
 
 async def scan_for_devices(timeout):
@@ -86,14 +83,22 @@ async def send_data(address, data):
                         )
             # DEBUG INFO END
 
+            async def notification_callback(sender, data):
+                if data == bytearray(b'\x1a\x0f\x0c'):
+                    await client.disconnect()
+
+            await client.start_notify(NOTIFICATION_CHARACTERISTIC_UUI, notification_callback)
+
             # chunkify data and send to the client
-            logger.info("Sending commands to device with address==" + address)
+            logger.info("Transmiting data to device with address==" + address)
             for i, chunk in enumerate(chunkify(data, chunk_size)):
                 await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk)
 
-            await asyncio.sleep(WAIT_AFTER_DATA_SENT_S)
+            logger.info("Finished data transmission." )
 
-            logger.info("Send data finished: " + str(client.is_connected) + " MTU: " + str(client.mtu_size))
+            while client.is_connected:
+                await asyncio.sleep(1)
+
 
     except Exception as e:
         logger.error(str(e))

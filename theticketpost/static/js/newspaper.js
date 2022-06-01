@@ -9,7 +9,8 @@ const NewspaperApp = {
             loaded: false,
             printer: null,
             id: 0,
-            apps: []
+            apps: [],
+            print_disabled: false,
         }
     },
     async created() {
@@ -73,10 +74,12 @@ const NewspaperApp = {
             }
         },
         print: async function() {
+            this.print_disabled = true;
 
-            const response = await fetch('/api/settings/config', {
+            let response = await fetch('/api/settings/config', {
                 method: 'GET'
             });
+
             const jsonData = await response.json();
 
             if (jsonData.printer.device) {
@@ -86,6 +89,8 @@ const NewspaperApp = {
                     method: 'GET'
                 });
             }
+
+            this.print_disabled = false;
 
         }
     }

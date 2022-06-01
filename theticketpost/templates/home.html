@@ -83,7 +83,10 @@
         </div>
 
         <hr class="my-4">
-        <button v-if="device" type="button" class="w-100 btn btn-primary btn-lg mb-3" @click="print()">Print</button>
+        <button v-if="device" type="button" class="w-100 btn btn-primary btn-lg mb-3" @click="print()" :disabled='print_disabled'>
+            <span v-if="print_disabled" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            { print_disabled ? ' Printing... ': 'Print' }
+        </button>
 
     </div>
 </div>

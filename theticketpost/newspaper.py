@@ -1,5 +1,12 @@
+import theticketpost.printer.ble
+import theticketpost.printer.cmd
+import theticketpost.settings
+
 import asyncio
 from pyppeteer import launch
+from PIL import Image
+from loguru import logger
+import os
 
 async def to_img_thread(path, port):
 
@@ -25,8 +32,6 @@ async def to_img_thread(path, port):
         }
     }''')
 
-    print(dimensions)
-
     await page.setViewport(dimensions)
 
     # create a screenshot of the page and save it
@@ -34,6 +39,22 @@ async def to_img_thread(path, port):
     # close the browser
     await browser.close()
 
+
 def to_img(path, port):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(to_img_thread(path, port))
+
+
+def print(address, port):
+    path = os.path.join(theticketpost.settings.get_storage_path(), 'last_newspaper.png')
+    to_img(path, port)
+    logger.info("Ticket rendered and saved in folder " + path)
+
+    with Image.open(path) as img:
+        # width 384 dots
+        img = img.resize(size=(384, int(img.height * 384 / img.width)))
+        dithered = img.convert("1")
+        logger.info("Applied Floyd-Steinberg dither...")
+        data = theticketpost.printer.cmd.cmds_print_img( dithered )
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(theticketpost.printer.ble.send_data(address, data))

@@ -95,7 +95,8 @@ async def scan_for_printers():
 async def print_newspaper(address):
     logger.info("Printing ticket on " + address)
     code, msg = theticketpost.newspaper.print(address, port)
-    logger.info("Print finished")
+    if code == 200:
+        logger.info(msg)
     return Response(msg, status=code, mimetype='text/plain')
 
 

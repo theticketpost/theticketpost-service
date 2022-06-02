@@ -4,7 +4,7 @@ import theticketpost.logger
 import theticketpost.printer.ble
 import theticketpost.scheduler
 
-from flask import Flask, Response, render_template, request, jsonify
+from flask import Flask, Response, render_template, request, jsonify, make_response
 
 from loguru import logger
 
@@ -84,16 +84,19 @@ def save_or_get_settings(file):
 
 @app.route('/api/printer/scan')
 async def scan_for_printers():
-    data = await theticketpost.printer.ble.scan_for_devices(ble_scan_timout)
-    return jsonify(data)
+    data, code, msg = await theticketpost.printer.ble.scan_for_devices(ble_scan_timout)
+    if code == 200:
+        return jsonify(data)
+
+    return Response(msg, status=code, mimetype='text/plain')
 
 
 @app.route('/api/printer/<string:address>/print')
 async def print_newspaper(address):
     logger.info("Printing ticket on " + address)
-    theticketpost.newspaper.print(address, port)
+    code, msg = theticketpost.newspaper.print(address, port)
     logger.info("Print finished")
-    return "200"
+    return Response(msg, status=code, mimetype='text/plain')
 
 
 def main():
@@ -101,7 +104,7 @@ def main():
     config = theticketpost.settings.get_json("config")
     if 'webserver' in config and 'port' in config['webserver']:
         port = config['webserver']['port']
-        
+
     global ttp_scheduler
     ttp_scheduler = theticketpost.scheduler.Scheduler(config)
     ttp_scheduler.start()

@@ -57,4 +57,9 @@ def print(address, port):
         logger.info("Applied Floyd-Steinberg dither...")
         data = theticketpost.printer.cmd.cmds_print_img( dithered )
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(theticketpost.printer.ble.send_data(address, data))
+        try:
+            loop.run_until_complete(theticketpost.printer.ble.send_data(address, data))
+        except Exception as e:
+            return 500, str(e)
+
+        return 200, "Printed successfully"

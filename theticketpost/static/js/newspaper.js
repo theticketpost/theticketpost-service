@@ -88,6 +88,18 @@ const NewspaperApp = {
                 response = await fetch('/api/printer/' + printer_address + '/print', {
                     method: 'GET'
                 });
+
+                type = response.status == 200 ? "success" : "error";
+                
+                const text = await response.text();
+
+                this.$toast.open({
+                    message: text,
+                    type: type,
+                    duration: 5000,
+                    position: "top-right",
+                    dismissible: true
+                })
             }
 
             this.print_disabled = false;
@@ -96,4 +108,6 @@ const NewspaperApp = {
     }
 }
 
-createApp(NewspaperApp).mount('#newspaper-app');
+const app = createApp(NewspaperApp);
+app.mount('#newspaper-app');
+app.use(VueToast.ToastPlugin);

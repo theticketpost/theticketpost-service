@@ -26,17 +26,19 @@ async def scan_for_devices(timeout):
         await scanner.start()
         await asyncio.sleep(timeout)
         await scanner.stop()
-    except:
-        pass
 
-    for d in scanner.discovered_devices:
-        entry = {
-            "name": d.name,
-            "address": d.address,
-        }
-        device_ids.append(entry)
+        for d in scanner.discovered_devices:
+            entry = {
+                "name": d.name,
+                "address": d.address,
+            }
+            device_ids.append(entry)
 
-    return device_ids
+    except Exception as e:
+        logger.error(str(e))
+        return device_ids, 500, str(e)
+
+    return device_ids, 200, "Success"
 
 
 def chunkify(data, chunk_size):
@@ -101,3 +103,4 @@ async def send_data(address, data):
 
     except Exception as e:
         logger.error(str(e))
+        raise e

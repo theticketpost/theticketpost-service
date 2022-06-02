@@ -61,10 +61,24 @@ const SettingsApp = {
                 method: 'GET'
             });
 
-            response.json().then( json => {
+            this.scan_disabled = false;
+
+            if (response.status == 200) {
+                const json = await response.json();
                 this.devices = json;
-                this.scan_disabled = false;
-            })
+            }
+            else {
+                const text = await response.text();
+
+                this.$toast.open({
+                    message: text,
+                    type: "error",
+                    duration: 5000,
+                    position: "top-right",
+                    dismissible: true
+                })
+            }
+
         },
         save_settings: async function() {
 
@@ -77,6 +91,13 @@ const SettingsApp = {
                 body: JSON.stringify(this.config)
             });
 
+            this.$toast.open({
+                message: "Settings updated",
+                type: "success",
+                duration: 5000,
+                position: "top-right",
+                dismissible: true
+            })
         },
         get_settings: async function() {
             const response = await fetch('/api/settings/config', {
@@ -92,4 +113,6 @@ const SettingsApp = {
     }
 }
 
-createApp(SettingsApp).mount('#settings-app');
+const app = createApp(SettingsApp);
+app.mount('#settings-app');
+app.use(VueToast.ToastPlugin);

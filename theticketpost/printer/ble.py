@@ -5,7 +5,6 @@ from bleak.backends.scanner import AdvertisementData
 from bleak.backends.device import BLEDevice
 
 from loguru import logger
-from waiting import wait
 
 POSSIBLE_SERVICE_UUIDS = [
     '0000ae30-0000-1000-8000-00805f9b34fb',

@@ -76,7 +76,8 @@ def save_or_get_settings(file):
         if (content_type == 'application/json'):
             json = request.json
             theticketpost.settings.save_json(file, json)
-            ttp_scheduler.set_schedule(json)
+            if (file == 'config'):
+                ttp_scheduler.set_schedule(json)
             return "200"
 
     return "500"

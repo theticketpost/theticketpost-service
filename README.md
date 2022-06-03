@@ -26,13 +26,15 @@ $bash> theticketpost-service
 
 Open a browser and navigates to `localhost:8080`
 
+> After each repository update, clean config files hosted on local (~/.theticketpost) to avoid unwanted behaviours because of not compatible config files :)
+
 ## Mockup
 
 You can find the mockup [here](https://mydraft.cc/c9t85hh6j4edn171387g)
 
 ## Raspberry Pi
 
-Tested on RaspberryPi 3 with Raspberry Pi OS Lite (64-bit) Debian Bullseye 
+Tested on RaspberryPi 3 with Raspberry Pi OS Lite (64-bit) Debian Bullseye
 
 ```bash
 $bash> sudo apt update

@@ -8,9 +8,7 @@ const SettingsApp = {
                     port: 8080,
                 },
                 printer: {
-                    device: null,
-                    dpi: 200,
-                    paper_width: 53,
+                    device: null
                 },
                 schedule: {
                     monday: { active: false, time: "00:00" },
@@ -22,6 +20,7 @@ const SettingsApp = {
                     sunday: { active: false, time: "00:00" },
                 },
             },
+            config_warning: false,
             scan_disabled: false,
             devices: [],
         }
@@ -91,6 +90,8 @@ const SettingsApp = {
                 body: JSON.stringify(this.config)
             });
 
+            this.config_warning = false;
+
             this.$toast.open({
                 message: "Settings updated",
                 type: "success",
@@ -105,9 +106,15 @@ const SettingsApp = {
             });
 
             response.json().then( json => {
-                this.config = Object.assign( this.config, json);
-                if (this.config.printer.device)
-                    this.devices.push( this.config.printer.device );
+                if ( Object.keys(json).length > 0) {
+                    this.config_warning = false;
+                    this.config = Object.assign( this.config, json);
+                    if (this.config.printer.device)
+                        this.devices.push( this.config.printer.device );
+                }
+                else {
+                    this.config_warning = true;
+                }
             })
         }
     }

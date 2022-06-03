@@ -1,4 +1,4 @@
-<div v-if="loaded" id="newspaper" :style="{width: ticket_px_width + 'px'}">
+<div v-if="loaded && device" id="newspaper" :style="{width: ticket_px_width + 'px'}">
 
     <vuedraggable v-model="apps" item-key="id" class="list-group" @end="save_json()">
         <template #item="{ element, index }">

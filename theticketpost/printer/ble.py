@@ -6,6 +6,9 @@ from bleak.backends.device import BLEDevice
 
 from loguru import logger
 
+
+PRINT_WIDTH = 384
+
 POSSIBLE_SERVICE_UUIDS = [
     '0000ae30-0000-1000-8000-00805f9b34fb',
     '0000af30-0000-1000-8000-00805f9b34fb',
@@ -31,6 +34,7 @@ async def scan_for_devices(timeout):
             entry = {
                 "name": d.name,
                 "address": d.address,
+                "dots_per_line": PRINT_WIDTH
             }
             device_ids.append(entry)
 

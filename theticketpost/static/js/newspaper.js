@@ -20,8 +20,8 @@ const NewspaperApp = {
     delimiters: ['{', '}'],
     computed: {
         ticket_px_width: function() {
-            if ( this.printer && this.printer.dpi && this.printer.paper_width ) {
-                return Math.round( this.printer.dpi * this.printer.paper_width / 25.4 );
+            if ( this.printer && this.printer.device ) {
+                return this.printer.device.dots_per_line
             } else {
                 return 0;
             }
@@ -90,7 +90,7 @@ const NewspaperApp = {
                 });
 
                 type = response.status == 200 ? "success" : "error";
-                
+
                 const text = await response.text();
 
                 this.$toast.open({

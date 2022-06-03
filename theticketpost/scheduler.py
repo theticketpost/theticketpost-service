@@ -1,3 +1,5 @@
+import theticketpost.newspaper
+
 from threading import Thread
 from loguru import logger
 import time
@@ -8,6 +10,7 @@ class Scheduler(Thread):
         Thread.__init__(self)
         logger.info("Starting scheduler...")
         self.set_schedule(config)
+        self.config = config
         logger.info("Scheduler started")
 
     def run(self):
@@ -16,11 +19,17 @@ class Scheduler(Thread):
             time.sleep(1)
 
     def print_newspaper(self):
-        logger.info("Printing newspaper...")
-        time.sleep(1)
-        logger.info("Newspaper printed")
+        logger.info("Initializing scheduler callback")
+        if ("printer" in self.config and self.config["printer"]["device"]):
+            port = self.config["webserver"]["port"]
+            address = self.config["printer"]["device"]["address"]
+            theticketpost.newspaper.print(address, port)
+        else:
+            logger.error("Printer not configured")
+
 
     def set_schedule(self, config):
+        self.config = config
         schedule.clear()
         if ( "schedule" in config ):
             if config["schedule"]["monday"]["active"]:

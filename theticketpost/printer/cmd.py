@@ -1,13 +1,11 @@
 from loguru import logger
 
-PRINT_WIDTH = 384
-
-#bytearray
-
 def cmd_header():
-    #ESC @: initialize printer
-    #ESC a: select justification
-    # 1: centered
+    # 0x1b 0x40      -> command ESC @: initialize printer
+    # 0x1b 0x61      -> command ESC a: select justification
+    # 0x01           range: 0 (left-justification), 1 centered,
+    #                    2 (right justification)
+    # 0x1f 0x11 0x02 0x04
     return  b'\x1b\x40'\
             b'\x1b\x61'\
             b'\x01'\
@@ -15,6 +13,14 @@ def cmd_header():
 
 
 def cmd_footer():
+    # 0x1b 0x64      -> command ESC d : print and feed n lines
+    # 0x02           number of line to feed
+    # 0x1b 0x64      -> command ESC d : print and feed n lines
+    # 0x02           number of line to feed
+    # 0x1f 0x11 0x08
+    # 0x1f 0x11 0x0e
+    # 0x1f 0x11 0x07
+    # 0x1f 0x11 0x09
     return  b'\x1b\x64\x02'\
             b'\x1b\x64\x02'\
             b'\x1f\x11\x08'\
@@ -23,8 +29,13 @@ def cmd_footer():
             b'\x1f\x11\x09'
 
 
-def cmd_marker(lines=0x100):
-    return b'\x1d\x76\x30\x00\x30\x00'+(lines - 1).to_bytes(2, 'little')
+def cmd_marker(lines, width):
+    # 0x1d 0x76 0x30 -> command GS v 0 : print raster bit image
+    # 0x00              mode: 0 (normal), 1 (double width),
+    #                   2 (double-height), 3 (quadruple)
+    # 0x30 0x00         16bit, little-endian: number of bytes / line (48)
+    # 0xff 0x00         16bit, little-endian: number of lines in the image (255)
+    return b'\x1d\x76\x30\x00'+(int(width / 8)).to_bytes(2, 'little')+(lines - 1).to_bytes(2, 'little')
 
 
 def cmd_line(image, line):
@@ -54,7 +65,7 @@ def cmds_print_img(image):
         lines = remaining
         if lines > 256:
             lines = 256
-        data += cmd_marker(lines)
+        data += cmd_marker(lines, image.width)
         remaining -= lines
         while lines > 0:
             data += cmd_line(image, line)

@@ -4,7 +4,7 @@ import theticketpost.logger
 import theticketpost.printer.ble
 import theticketpost.scheduler
 
-from flask import Flask, Response, render_template, request, jsonify, make_response
+from flask import Flask, Response, render_template, request, jsonify, redirect, url_for
 
 from loguru import logger
 
@@ -19,22 +19,39 @@ ble_scan_timout = 10
 port = 8080
 
 # WEB SERVER METHODS
+def check_minimal_config():
+    config = theticketpost.settings.get_json("config")
+    if ( len(config) == 0):
+        logger.warning("Config file empty, redirecting user to settings")
+        return redirect( url_for('settings') )
+
 @app.route('/')
 @app.route('/home')
 def home():
-    return render_template('home.html', title='TheTicketPost', version=version )
+    redirection = check_minimal_config()
+    if redirection:
+        return redirection
+    return render_template('home.html', title='TheTicketPost', version=version)
+
 
 @app.route('/newspaper')
 def newspaper():
     return render_template('newspaper.html', title='TheTicketPost')
 
+
 @app.route('/apps')
 def apps():
+    redirection = check_minimal_config()
+    if redirection:
+        return redirection
     return render_template('apps.html', title='TheTicketPost', version=version)
 
 
 @app.route('/store')
 def store():
+    redirection = check_minimal_config()
+    if redirection:
+        return redirection
     return render_template('store.html', title='TheTicketPost', version=version)
 
 

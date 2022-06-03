@@ -41,7 +41,8 @@ async def to_img_thread(path, port):
 
 
 def to_img(path, port):
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     loop.run_until_complete(to_img_thread(path, port))
 
 
@@ -51,8 +52,6 @@ def print(address, port):
     logger.info("Ticket rendered and saved in folder " + path)
 
     with Image.open(path) as img:
-        # width 384 dots
-        img = img.resize(size=(384, int(img.height * 384 / img.width)))
         dithered = img.convert("1")
         logger.info("Applied Floyd-Steinberg dither...")
         data = theticketpost.printer.cmd.cmds_print_img( dithered )

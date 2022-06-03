@@ -8,6 +8,9 @@
         <h1>Settings</h1>
     </div>
     <div class="container px-4">
+        <div v-if="config_warning" class="alert alert-warning mb-5" role="alert">
+            Please, configure and save settings before continue.
+        </div>
         <form>
             <h4 class="mb-3">Printer</h4>
             <div class="row mb-3">
@@ -26,24 +29,6 @@
                         <span v-if="scan_disabled" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         { scan_disabled ? ' Scanning... ': 'Scan' }
                     </button>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-6">
-                    <label for="printer_dpi" class="form-label">dpi</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control" id="printer_dpi" placeholder=""
-                            v-model="config.printer.dpi" >
-                        <span class="input-group-text">dpi</span>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <label for="printer_paper_width" class="form-label">Paper width</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control" id="printer_paper_width" placeholder=""
-                            v-model="config.printer.paper_width" >
-                        <span class="input-group-text">mm</span>
-                    </div>
                 </div>
             </div>
             <hr class="my-4">

@@ -3,6 +3,7 @@ import theticketpost.newspaper
 import theticketpost.logger
 import theticketpost.printer.ble
 import theticketpost.scheduler
+import theticketpost.applications
 
 from flask import Flask, Response, render_template, request, jsonify, redirect, url_for
 
@@ -127,6 +128,8 @@ def main():
     global ttp_scheduler
     ttp_scheduler = theticketpost.scheduler.Scheduler(config)
     ttp_scheduler.start()
+
+    theticketpost.applications.init()
 
     logger.info( "Starting webserver on port: " + str(port) )
     app.run(debug=False, use_reloader=False, host='0.0.0.0', port=port)

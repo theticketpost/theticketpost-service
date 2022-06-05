@@ -28,6 +28,9 @@ Open a browser and navigates to `localhost:8080`
 
 > After each repository update, clean config files hosted on local (~/.theticketpost) to avoid unwanted behaviours because of not compatible config files :)
 
+## Applications
+**theticketpost-service** will load automatically all the applications located in the folder `~/.theticketpost/apps`. So place there the applications you desire to load from the [apps repository](https://github.com/theticketpost/theticketpost-apps) or create a symbolic link named `apps` in `~/.theticketpost` pointing to the **apps repository folder** to load all the applications hosted in the repo.
+
 ## Mockup
 
 You can find the mockup [here](https://mydraft.cc/c9t85hh6j4edn171387g)

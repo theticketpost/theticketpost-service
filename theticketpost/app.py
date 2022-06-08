@@ -119,17 +119,30 @@ async def print_newspaper(address):
     return Response(msg, status=code, mimetype='text/plain')
 
 
+@app.route('/api/apps/installed')
+async def installed_apps():
+    list =  []
+    apps = theticketpost.applications.list()
+    for key, app in apps.items():
+        list.append( app.get_description() )
+
+    return jsonify(list)
+
+
 def main():
     global port
     config = theticketpost.settings.get_json("config")
     if 'webserver' in config and 'port' in config['webserver']:
         port = config['webserver']['port']
 
+    # init scheduler
     global ttp_scheduler
     ttp_scheduler = theticketpost.scheduler.Scheduler(config)
     ttp_scheduler.start()
 
-    theticketpost.applications.init()
+    # load applications
+    theticketpost.applications.init(app)
 
+    # load webserver
     logger.info( "Starting webserver on port: " + str(port) )
     app.run(debug=False, use_reloader=False, host='0.0.0.0', port=port)

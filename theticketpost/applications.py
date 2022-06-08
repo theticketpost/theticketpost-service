@@ -13,7 +13,7 @@ def list():
     return  applications
 
 
-def load_module(path, desc):
+def load_module(path, desc,flaskApp):
     global applications
 
     logger.info("Loading application " + desc["name"])
@@ -21,12 +21,13 @@ def load_module(path, desc):
     foo = importlib.util.module_from_spec(spec)
     sys.modules[desc["name"]] = foo
     spec.loader.exec_module(foo)
-    app = foo.App()
+    app = foo.App(desc)
     app.start()
     applications[desc["name"]] = app
+    flaskApp.register_blueprint(app.blueprint)
 
 
-def init():
+def init(flaskApp):
     apps_folder = os.path.join(theticketpost.settings.get_storage_path(), "apps")
     if not os.path.exists(apps_folder):
         os.makedirs(apps_folder)
@@ -39,4 +40,4 @@ def init():
                 with open(os.path.join(root, file)) as json_file:
                     description = json.load(json_file)
                 module_path = os.path.join(root, "app.py")
-                load_module(module_path, description)
+                load_module(module_path, description, flaskApp)

@@ -8,38 +8,40 @@
 </div>
 <div class="container px-4">
     <div id="apps-app">
+
         <div class="row">
             <div v-for="app in apps" class="col-auto mb-3">
                 <div class="card" style="width: 18rem;">
-                  <div class="card-body">
-                    <h5 class="card-title text-capitalize">{ app.name }</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">v{ app.version }</h6>
-                    <p class="card-text">{ app.description }</p>
-                    <button type="button" class="btn btn-primary" v-bind:data-component-id="app.name" data-bs-toggle="modal" data-bs-target="#theModal">Settings</button>
+                    <div class="card-body">
+                        <h5 class="card-title text-capitalize">{ app.name }</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">v{ app.version }</h6>
+                        <p class="card-text">{ app.description }</p>
+                        <button type="button" class="btn btn-primary" v-bind:data-component-id="app.name" data-bs-toggle="modal" data-bs-target="#theModal">Settings</button>
                     </div>
-                  </div>
                 </div>
             </div>
         </div>
 
         <div class="modal fade" id="theModal" tabindex="-1" aria-labelledby="theModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 id="app-configuration-title" class="modal-title text-capitalize">Title</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <form id="app-configuration-form"></form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-              </div>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="app-configuration-title" class="modal-title text-capitalize">Title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="app-configuration-form" v-html="rawHtml"></form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" @click="save_app_settings()">Save changes</button>
+                    </div>
+                </div>
             </div>
-          </div>
+        </div>
 
     </div>
 </div>
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/apps.js') }}"></script>
 {% endblock %}

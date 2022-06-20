@@ -30,7 +30,22 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="app-configuration-form" v-html="rawHtml"></form>
+                        <form id="app-configuration-form">
+                            <div v-for="input in template">
+                                <div v-if="input.type == 'checkbox'" class="my-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="{input.name}" v-model="input.value">
+                                    <label class="form-check-label" for="{input.name}">{input.label}</label>
+                                </div>
+                                <div v-else-if="input.type == 'number'" class="my-4">
+                                    <label for="{input.name}" class="form-label">{input.label}</label>
+                                    <input type="number" class="form-control" id="{input.name}" v-model="input.value" >
+                                </div>
+                                <div v-else-if="input.type == 'text'" class="my-4">
+                                    <label for="{input.name}" class="form-label">{input.label}</label>
+                                    <input type="text" class="form-control" id="{input.name}" v-model="input.value" >
+                                </div>
+                            </div>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

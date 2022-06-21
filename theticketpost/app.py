@@ -85,15 +85,19 @@ def log_clear():
 @app.route('/api/settings/<string:file>', methods=['GET', 'POST'])
 def save_or_get_settings(file):
 
+    folder = ""
+    if ( "app" in request.args.keys() ):
+        folder = "apps/" + request.args.get("app")
+
     if (request.method == 'GET'):
-        json = theticketpost.settings.get_json(file)
+        json = theticketpost.settings.get_json(file, folder=folder)
         return jsonify(json)
 
     if (request.method == 'POST'):
         content_type = request.headers.get('Content-Type')
         if (content_type == 'application/json'):
             json = request.json
-            theticketpost.settings.save_json(file, json)
+            theticketpost.settings.save_json(file, json, folder=folder)
             if (file == 'config'):
                 ttp_scheduler.set_schedule(json)
             return "200"

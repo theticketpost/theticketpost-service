@@ -30,7 +30,7 @@ const AppsApp = {
             console.log( componentId );
         },
         save_app_settings: async function() {
-            const response = await fetch('/api/settings/' + this.componentId, {
+            const response = await fetch('/api/settings/config?app=' + this.componentId, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -38,6 +38,15 @@ const AppsApp = {
                 },
                 body: JSON.stringify(this.template)
             });
+
+            this.$toast.open({
+                message: "Settings for " + this.componentId + " updated",
+                type: "success",
+                duration: 5000,
+                position: "top-right",
+                dismissible: true
+            })
+
         },
         get_installed_apps: async function() {
             let response = await fetch('/api/apps/installed', {
@@ -48,9 +57,6 @@ const AppsApp = {
             if (Array.isArray(jsonData)) {
                 this.apps = jsonData;
             }
-        },
-        open_modal: async function() {
-            let modal = document.getElementById('theModal');
         }
     }
 }

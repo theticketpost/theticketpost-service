@@ -16,7 +16,7 @@
                         <h5 class="card-title text-capitalize">{ app.name }</h5>
                         <h6 class="card-subtitle mb-2 text-muted">v{ app.version }</h6>
                         <p class="card-text">{ app.description }</p>
-                        <button type="button" class="btn btn-primary" v-bind:data-component-id="app.name" data-bs-toggle="modal" data-bs-target="#theModal">Settings</button>
+                        <button type="button" class="btn btn-primary" v-bind:data-component-id="app.name" data-bs-toggle="modal" data-bs-target="#theModal" v-if="app.configuration">Settings</button>
                     </div>
                 </div>
             </div>

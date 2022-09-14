@@ -10,10 +10,12 @@ const NewspaperApp = {
             printer: null,
             id: 0,
             apps: [],
+            installed_apps: [],
             print_disabled: false,
         }
     },
     async created() {
+        await this.get_installed_apps();
         await this.get_json()
         this.loaded = true;
     },
@@ -104,6 +106,16 @@ const NewspaperApp = {
 
             this.print_disabled = false;
 
+        },
+        get_installed_apps: async function() {
+            let response = await fetch('/api/apps/installed', {
+                method: 'GET'
+            });
+            let jsonData = await response.json();
+
+            if (Array.isArray(jsonData)) {
+                this.installed_apps = jsonData;
+            }
         }
     }
 }

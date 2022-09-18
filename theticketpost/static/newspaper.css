@@ -1,0 +1,10 @@
+#newspaper {
+    min-height: 0px !important;
+    border: 0px !important;
+    background-color: white !important;
+}
+
+.list-group-item {
+    border: 0px !important;
+    border-radius: 0px !important;
+}

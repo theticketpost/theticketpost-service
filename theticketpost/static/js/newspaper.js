@@ -132,7 +132,10 @@ const NewspaperApp = {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify( config ) } ).then( (response) => {
-                response.text().then( (rawhtml) => { console.log(id); this.apps.at(id)["rawhtml"] = rawhtml; });
+                response.text().then( (rawhtml) => {
+                    this.apps.at(id)["rawhtml"] = rawhtml;
+                    this.save_json();
+                });
             })
         }
     }

@@ -1,6 +1,8 @@
 {% extends 'headers.html' %}
 
 {% block page %}
+<link rel="stylesheet" href="{{ url_for('static', filename='newspaper.css') }}">
+
 <div id="newspaper-app">
     {% include 'ticket.html' %}
 </div>

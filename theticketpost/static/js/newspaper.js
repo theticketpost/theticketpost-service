@@ -36,12 +36,19 @@ const NewspaperApp = {
         }
     },
     methods: {
-        add: function(title) {
-            this.apps.push({ title: title, id: this.id++ });
-            this.save_json();
+        add: function(appname) {
+            fetch('/api/apps/' + appname + '/inspector').then( (response) => {
+                response.json().then( (json) => {
+                    this.apps.push({ id: this.id++, appname: appname, config: json, rawhtml: "" });
+                    this.id = this.apps.length;
+                    this.render_component(this.id-1, appname, json);
+                    this.save_json();
+                })
+            })
         },
         del: function( index ) {
             this.apps.splice(index, 1);
+            this.id = this.apps.length;
             this.save_json();
         },
         save_json: async function() {
@@ -116,6 +123,17 @@ const NewspaperApp = {
             if (Array.isArray(jsonData)) {
                 this.installed_apps = jsonData;
             }
+        },
+        render_component: function(id, appname, config) {
+            fetch('/api/apps/' + appname + '/component', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify( config ) } ).then( (response) => {
+                response.text().then( (rawhtml) => { console.log(id); this.apps.at(id)["rawhtml"] = rawhtml; });
+            })
         }
     }
 }

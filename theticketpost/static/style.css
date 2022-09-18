@@ -27,10 +27,25 @@ svg {
     background-color: rgb(248,249,250);
 }
 
-.component button {
+.list-group-item button {
     visibility: hidden;
 }
 
-.component:hover button {
+.list-group-item:hover button {
     visibility: visible;
+}
+
+.list-group > * {
+    padding: 0;
+}
+
+.list-group-item > * {
+    padding: 0;
+}
+
+.render-component {
+    position: relative;
+}
+.btn-close {
+    position: absolute;
 }

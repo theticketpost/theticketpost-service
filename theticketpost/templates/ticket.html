@@ -4,8 +4,10 @@
         <template #item="{ element, index }">
             <div class="card list-group-item">
                 <div class="component card-body row justify-content-between">
-                    { element.title }
-                    <button type="submit" class="btn-close float-end" @click="del(index)"></button>
+                    <span class="render-component">
+                        <span v-html="element.rawhtml"></span>
+                        <button type="submit" class="btn-close" @click="del(index)"></button>
+                    </span>
                 </div>
             </div>
         </template>

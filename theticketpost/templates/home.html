@@ -16,12 +16,14 @@
 <div id="newspaper-app">
     <div class="p-5">
         <div class="col mb-4">
-            <button v-for="app in installed_apps" type="button" class="btn btn-dark mx-1" @click="add('Image')">
-                <svg width="16" height="16">
-                    <use :xlink:href="app.icon_url + '#layer1'"/>
-                </svg>
-                { app.name }
-            </button>
+            <template v-for="app in installed_apps">
+                <button v-if="app.render_component" type="button" class="btn btn-dark mx-1" v-on:click="add(app.name)">
+                    <svg width="16" height="16">
+                        <use :xlink:href="app.icon_url + '#layer1'"/>
+                    </svg>
+                    { app.name }
+                </button>
+            </template>
         </div>
 
         <div class="d-flex justify-content-center flex-nowrap">

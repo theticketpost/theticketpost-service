@@ -27,6 +27,14 @@ svg {
     background-color: rgb(248,249,250);
 }
 
+.list-group-item:hover {
+    cursor: pointer;
+}
+
+.list-group-item {
+    padding-bottom: 1em !important;
+}
+
 .list-group-item button {
     visibility: hidden;
 }
@@ -48,4 +56,9 @@ svg {
 }
 .btn-close {
     position: absolute;
+}
+
+.image_preview {
+    width: 100%;
+    margin-top: 1em;
 }

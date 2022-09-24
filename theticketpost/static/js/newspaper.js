@@ -12,7 +12,21 @@ const NewspaperApp = {
             apps: [],
             installed_apps: [],
             print_disabled: false,
+            template: [],
+            component_id: 0,
         }
+    },
+    mounted() {
+        let element = document.getElementById('theModal');
+        element.addEventListener('show.bs.modal', async (e) => {
+            this.component_id = e.relatedTarget.getAttribute('data-component-id');
+            this.get_component_inspector_form(this.component_id);
+        });
+        element.addEventListener('hidden.bs.modal', async (e) => {
+            this.template = [];
+            document.getElementById('component-configuration-form').reset();
+        });
+
     },
     async created() {
         await this.get_installed_apps();
@@ -114,6 +128,10 @@ const NewspaperApp = {
             this.print_disabled = false;
 
         },
+        get_component_inspector_form: async function( componentId ) {
+            let jsonData = this.apps.at(componentId)["config"];
+            this.template = jsonData;
+        },
         get_installed_apps: async function() {
             let response = await fetch('/api/apps/installed', {
                 method: 'GET'
@@ -136,6 +154,48 @@ const NewspaperApp = {
                     this.apps.at(id)["rawhtml"] = rawhtml;
                     this.save_json();
                 });
+            })
+        },
+        preview_img: function(event) {
+            preview_image = event.target.nextElementSibling;
+            preview_image.src = URL.createObjectURL(event.target.files[0]);
+            preview_image.onload = function() {
+              URL.revokeObjectURL(preview_image.src) // free memory
+            }
+        },
+        save_component_options: function() {
+            let app = this.apps.at(this.component_id);
+
+            // upload all files inside input file
+            const input_files = document.getElementsByClassName("input-file");
+
+            let all_done = new Promise( (resolve, reject) => {
+                input_files.forEach( (input, key, array) => {
+                    let file = input.files[0];
+                    let formData = new FormData();
+                    formData.append("file", file, file.name);
+                    fetch('/api/apps/' + app.appname + '/upload', {method: "POST", body: formData}).then( (response)=> {
+                        response.json().then( (json)=> {
+                            if ( json.code == 200 ) {
+                                let parameter = app["config"].find( element => element.name === input.id );
+                                if (parameter) parameter["value"] = file.name;
+                            }
+                            if ( key === array.length -1 ) resolve();
+                        })
+                    });
+                });
+            });
+
+            all_done.then( () => {
+                this.render_component(this.component_id, app.appname, app.config);
+                
+                this.$toast.open({
+                    message: "Component updated",
+                    type: "success",
+                    duration: 5000,
+                    position: "top-right",
+                    dismissible: true
+                })
             })
         }
     }

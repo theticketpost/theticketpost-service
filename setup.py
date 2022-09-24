@@ -37,5 +37,6 @@ setup(
         'nest_asyncio',
         'Pillow',
         'schedule',
+        'werkzeug'
     ],
 )

@@ -40,13 +40,13 @@
                         <div v-else-if="input.type == 'image'" class="my-4">
                             <label :for="input.name" class="form-label">{input.label}</label>
                             <input type="file" class="form-control input-file" :id="input.name" accept="image/*" @change="preview_img">
-                            <img class="image_preview" :src="input.image_url" />
+                            <img class="image_preview" :src="input.url" />
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal-button">Close</button>
                 <button type="button" class="btn btn-primary" @click="save_component_options">Save changes</button>
             </div>
         </div>

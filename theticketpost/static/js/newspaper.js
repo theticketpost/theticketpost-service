@@ -172,23 +172,30 @@ const NewspaperApp = {
             let all_done = new Promise( (resolve, reject) => {
                 input_files.forEach( (input, key, array) => {
                     let file = input.files[0];
-                    let formData = new FormData();
-                    formData.append("file", file, file.name);
-                    fetch('/api/apps/' + app.appname + '/upload', {method: "POST", body: formData}).then( (response)=> {
-                        response.json().then( (json)=> {
-                            if ( json.code == 200 ) {
-                                let parameter = app["config"].find( element => element.name === input.id );
-                                if (parameter) parameter["value"] = file.name;
-                            }
-                            if ( key === array.length -1 ) resolve();
-                        })
-                    });
+                    if ( file ) {
+                        let formData = new FormData();
+                        formData.append("file", file, file.name);
+                        fetch('/api/apps/' + app.appname + '/upload', {method: "POST", body: formData}).then( (response)=> {
+                            response.json().then( (json)=> {
+                                if ( json.code == 200 ) {
+                                    let parameter = app["config"].find( element => element.name === input.id );
+                                    if ( parameter ) {
+                                        parameter["value"] = file.name;
+                                        parameter["url"] = json.url;
+                                    }
+                                }
+                                if ( key === array.length -1 ) resolve();
+                            })
+                        });
+                    } else {
+                        if ( key === array.length -1 ) resolve();
+                    }
                 });
             });
 
             all_done.then( () => {
                 this.render_component(this.component_id, app.appname, app.config);
-                
+                document.getElementById('close-modal-button').click();
                 this.$toast.open({
                     message: "Component updated",
                     type: "success",

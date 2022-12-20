@@ -14,7 +14,9 @@ async def to_img_thread(path, port):
     browser = await launch(
         handleSIGINT=False,
         handleSIGTERM=False,
-        handleSIGHUP=False
+        handleSIGHUP=False,
+        headless=True,
+        args=["--no-sandbox"]
     )
     # open a new tab in the browser
     page = await browser.newPage()

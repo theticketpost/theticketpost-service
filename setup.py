@@ -29,14 +29,14 @@ setup(
     entry_points={"console_scripts": ["theticketpost-service = theticketpost.app:main"]},
     python_requires=">=3.7",
     install_requires=[
-        'flask==2.1.2',
-        'aioflask',
+        'flask[async]==2.2.2',
+        'aioflask==0.4.0',
         'pyppeteer==1.0.2',
-        'bleak',
-        'loguru',
-        'nest_asyncio',
-        'Pillow',
-        'schedule',
-        'werkzeug'
+        'bleak==0.19.5',
+        'loguru==0.6.0',
+        'nest_asyncio==1.5.6',
+        'Pillow==9.3.0',
+        'schedule==1.1.0',
+        'werkzeug==2.2.2'
     ],
 )

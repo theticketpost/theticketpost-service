@@ -32,7 +32,7 @@ def init(flaskApp):
     if not os.path.exists(apps_folder):
         os.makedirs(apps_folder)
 
-    for root, dirs, files in os.walk(apps_folder, topdown=True):
+    for root, dirs, files in os.walk(apps_folder, topdown=True, followlinks=True):
         dirs[:] = [d for d in dirs if d not in ['.git']]
         for file in files:
             if file == "desc.json":

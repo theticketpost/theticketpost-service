@@ -170,27 +170,32 @@ const NewspaperApp = {
             const input_files = document.getElementsByClassName("input-file");
 
             let all_done = new Promise( (resolve, reject) => {
-                input_files.forEach( (input, key, array) => {
-                    let file = input.files[0];
-                    if ( file ) {
-                        let formData = new FormData();
-                        formData.append("file", file, file.name);
-                        fetch('/api/apps/' + app.appname + '/upload', {method: "POST", body: formData}).then( (response)=> {
-                            response.json().then( (json)=> {
-                                if ( json.code == 200 ) {
-                                    let parameter = app["config"].find( element => element.name === input.id );
-                                    if ( parameter ) {
-                                        parameter["value"] = file.name;
-                                        parameter["url"] = json.url;
+        
+                if ( input_files.length > 0 ) {
+                    input_files.forEach( (input, key, array) => {
+                        let file = input.files[0];
+                        if ( file ) {
+                            let formData = new FormData();
+                            formData.append("file", file, file.name);
+                            fetch('/api/apps/' + app.appname + '/upload', {method: "POST", body: formData}).then( (response)=> {
+                                response.json().then( (json)=> {
+                                    if ( json.code == 200 ) {
+                                        let parameter = app["config"].find( element => element.name === input.id );
+                                        if ( parameter ) {
+                                            parameter["value"] = file.name;
+                                            parameter["url"] = json.url;
+                                        }
                                     }
-                                }
-                                if ( key === array.length -1 ) resolve();
-                            })
-                        });
-                    } else {
-                        if ( key === array.length -1 ) resolve();
-                    }
-                });
+                                    if ( key === array.length -1 ) resolve();
+                                })
+                            });
+                        } else {
+                            if ( key === array.length -1 ) resolve();
+                        }
+                    });
+                } else {
+                    resolve();
+                }
             });
 
             all_done.then( () => {

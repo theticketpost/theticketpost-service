@@ -60,7 +60,6 @@ class Application(Thread):
 
 
     def get_configuration_json(self):
-        logger.debug
         path_to_config = os.path.join(os.path.dirname(self.file), 'config.json')
         if os.path.exists(path_to_config):
             with open(path_to_config) as config_file:

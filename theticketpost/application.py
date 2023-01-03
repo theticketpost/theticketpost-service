@@ -74,7 +74,7 @@ class Application(Thread):
         for attribute in self.desc["inspector_template"]:
             if attribute["type"] == "image":
                 attribute["url"] = url_for( self.name + 'app_blueprint.static', filename='files/' + attribute["value"])
-        return jsonify( self.desc["inspector_template"] )
+        return jsonify( { "refresh_component": self.desc["refresh_component"], "config": self.desc["inspector_template"] } )
 
 
 

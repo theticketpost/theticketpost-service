@@ -53,7 +53,7 @@ const NewspaperApp = {
         add: function(appname) {
             fetch('/api/apps/' + appname + '/inspector').then( (response) => {
                 response.json().then( (json) => {
-                    this.apps.push({ id: this.id++, appname: appname, config: json, rawhtml: "" });
+                    this.apps.push({ id: this.id++, appname: appname, refresh_component: json.refresh_component, config: json.config, rawhtml: "" });
                     this.id = this.apps.length;
                     this.render_component(this.id-1, appname, json);
                     this.save_json();
@@ -95,6 +95,14 @@ const NewspaperApp = {
                 this.apps = jsonData;
                 this.id = this.apps.length;
             }
+
+            //refresh components if required
+            this.apps.forEach((item, i) => {
+                if (item.refresh_component) {
+                    this.render_component(item.id, item.appname, item.config);
+                }
+            });
+
         },
         print: async function() {
             this.print_disabled = true;
@@ -129,7 +137,7 @@ const NewspaperApp = {
 
         },
         get_component_inspector_form: async function( componentId ) {
-            let jsonData = this.apps.at(componentId)["config"];
+            let jsonData = this.apps[componentId]["config"];
             this.template = jsonData;
         },
         get_installed_apps: async function() {
@@ -151,7 +159,7 @@ const NewspaperApp = {
                 },
                 body: JSON.stringify( config ) } ).then( (response) => {
                 response.text().then( (rawhtml) => {
-                    this.apps.at(id)["rawhtml"] = rawhtml;
+                    this.apps[id]["rawhtml"] = rawhtml;
                     this.save_json();
                 });
             })
@@ -164,13 +172,13 @@ const NewspaperApp = {
             }
         },
         save_component_options: function() {
-            let app = this.apps.at(this.component_id);
+            let app = this.apps[this.component_id];
 
             // upload all files inside input file
             const input_files = document.getElementsByClassName("input-file");
 
             let all_done = new Promise( (resolve, reject) => {
-        
+
                 if ( input_files.length > 0 ) {
                     input_files.forEach( (input, key, array) => {
                         let file = input.files[0];

@@ -21,7 +21,7 @@ async def to_img_thread(path, port):
     # open a new tab in the browser
     page = await browser.newPage()
     # add URL to a new page and then open it
-    await page.goto("http://localhost:" + str(port) + "/newspaper")
+    await page.goto("http://localhost:" + str(port) + "/newspaper", {'waitUntil' : 'networkidle0'})
 
     await page.waitForSelector("#newspaper", { "visible": True })
 

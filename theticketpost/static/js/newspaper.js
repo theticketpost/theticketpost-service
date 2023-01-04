@@ -30,7 +30,15 @@ const NewspaperApp = {
     },
     async created() {
         await this.get_installed_apps();
-        await this.get_json()
+        await this.get_json();
+
+        //refresh components if required
+        this.apps.forEach((item, i) => {
+            if (item.refresh_component) {
+                this.render_component(item.id, item.appname, item.config);
+            }
+        });
+
         this.loaded = true;
     },
     delimiters: ['{', '}'],
@@ -96,13 +104,6 @@ const NewspaperApp = {
                 this.id = this.apps.length;
             }
 
-            //refresh components if required
-            this.apps.forEach((item, i) => {
-                if (item.refresh_component) {
-                    this.render_component(item.id, item.appname, item.config);
-                }
-            });
-
         },
         print: async function() {
             this.print_disabled = true;
@@ -132,6 +133,9 @@ const NewspaperApp = {
                     dismissible: true
                 })
             }
+
+            //Update newspaper after being printed
+            this.get_json();
 
             this.print_disabled = false;
 

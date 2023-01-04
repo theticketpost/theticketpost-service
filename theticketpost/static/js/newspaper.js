@@ -63,7 +63,7 @@ const NewspaperApp = {
                 response.json().then( (json) => {
                     this.apps.push({ id: this.id++, appname: appname, refresh_component: json.refresh_component, config: json.config, rawhtml: "" });
                     this.id = this.apps.length;
-                    this.render_component(this.id-1, appname, json);
+                    this.render_component(this.id-1, appname, json.config);
                     this.save_json();
                 })
             })

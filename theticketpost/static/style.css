@@ -52,7 +52,7 @@ svg {
 }
 
 .render-component {
-    position: relative;
+    /* position: relative; */
 }
 .btn-close {
     position: absolute;

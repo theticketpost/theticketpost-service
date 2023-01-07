@@ -42,6 +42,14 @@
                             <input type="file" class="form-control input-file" :id="input.name" accept="image/*" @change="preview_img">
                             <img class="image_preview" :src="input.url" />
                         </div>
+                        <div v-else-if="input.type == 'select'" class="my-4">
+                            <label :for="input.name" class="form-label">{input.label}</label>
+                            <select class="form-select" class="form-control" v-model="input.value">
+                                <option v-for="option in input.options" :value="option.value" :selected="input.value == option.value">
+                                  { option.description }
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </form>
             </div>

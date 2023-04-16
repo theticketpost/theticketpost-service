@@ -48,6 +48,24 @@ const AppsApp = {
             })
 
         },
+        deleteCredential(credentials, index) {
+            console.log(index);
+            credentials.splice(index, 1);
+        },
+        handleCredentialUpload: function(event, index) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            var self = this;
+            reader.onload = () => {
+                const credential = {
+                    name: '',
+                    credential: JSON.parse(reader.result)
+                };
+                console.log(self.template[index]);
+                self.template[index].value.push(credential);
+            };
+            reader.readAsText(file);
+        },
         get_installed_apps: async function() {
             let response = await fetch('/api/apps/installed', {
                 method: 'GET'

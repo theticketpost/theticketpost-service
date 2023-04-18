@@ -40,6 +40,7 @@ setup(
         'werkzeug==2.2.2',
         'google-api-python-client==2.81.0',
         'google-auth-httplib2==0.1.0',
-        'google-auth-oauthlib==1.0.0'
+        'google-auth-oauthlib==1.0.0',
+        'google-auth==2.17.3'
     ]
 )

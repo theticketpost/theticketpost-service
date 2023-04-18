@@ -57,12 +57,28 @@ const AppsApp = {
             const reader = new FileReader();
             var self = this;
             reader.onload = () => {
-                const credential = {
+                const obj = {
                     name: '',
-                    credential: JSON.parse(reader.result)
+                    credential: JSON.parse(reader.result),
+                    token: ''
                 };
-                console.log(self.template[index]);
-                self.template[index].value.push(credential);
+
+                fetch("/api/google-auth/get-token", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(obj.credential),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      console.log("Token received:", data.access_token);
+                      obj.token = data.access_token
+                      self.template[index].value.push(obj)
+                    })
+                    .catch((error) => {
+                      console.error("Error:", error);
+                    });
             };
             reader.readAsText(file);
         },

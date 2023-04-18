@@ -4,6 +4,7 @@ import theticketpost.logger
 import theticketpost.printer.ble
 import theticketpost.scheduler
 import theticketpost.applications
+import theticketpost.googleauth
 
 from flask import Flask, Response, render_template, request, jsonify, redirect, url_for
 
@@ -110,6 +111,17 @@ def save_or_get_settings(file):
             return "200"
 
     return "500"
+
+
+@app.route('/api/google-auth/get-token', methods=['POST'])
+async def google_auth_get_token():
+    content_type = request.headers.get('Content-Type')
+    if (content_type == 'application/json'):
+        credential = request.json
+        token = theticketpost.googleauth.get_token(credential, scopes=['https://www.googleapis.com/auth/calendar'])
+        return jsonify({'access_token': token})
+
+    return Response("patata", status=200, mimetype='text/plain')
 
 
 @app.route('/api/printer/scan')

@@ -68,7 +68,7 @@ const AppsApp = {
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(obj.credential),
+                    body: JSON.stringify({credential: obj.credential, scopes: self.template[index].scopes}),
                   })
                     .then((response) => response.json())
                     .then((data) => {

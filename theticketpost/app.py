@@ -117,8 +117,10 @@ def save_or_get_settings(file):
 async def google_auth_get_token():
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
-        credential = request.json
-        token = theticketpost.googleauth.get_token(credential, scopes=['https://www.googleapis.com/auth/calendar'])
+        logger.info(request.json)
+        credential = request.json["credential"]
+        scopes = request.json["scopes"]
+        token = theticketpost.googleauth.get_token(credential, scopes)
         return jsonify({'access_token': token})
 
     return Response("patata", status=200, mimetype='text/plain')

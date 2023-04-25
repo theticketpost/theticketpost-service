@@ -2,6 +2,7 @@ import theticketpost.settings
 import os
 from loguru import logger
 
+import subprocess
 import importlib.util
 import sys
 import json
@@ -17,10 +18,16 @@ def load_module(path, desc,flaskApp):
     global applications
 
     logger.info("Loading application " + desc["name"])
+    
+    if "requirements" in desc:
+        requirements = desc["requirements"]
+        subprocess.check_call(["pip", "install"] + requirements)
+    
     spec = importlib.util.spec_from_file_location(desc["name"], path)
     foo = importlib.util.module_from_spec(spec)
     sys.modules[desc["name"]] = foo
     spec.loader.exec_module(foo)
+
     app = foo.App(desc)
     app.start()
     applications[desc["name"]] = app

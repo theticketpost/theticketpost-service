@@ -17,7 +17,7 @@
     <div class="p-5">
         <div class="col mb-4">
             <template v-for="app in installed_apps">
-                <button v-if="app.render_component" type="button" class="btn btn-dark mx-1" v-on:click="add(app.name)">
+                <button v-if="app.render_component" type="button" class="button-component btn btn-dark mx-1" v-on:click="add(app.name)">
                     <svg width="16" height="16">
                         <use :xlink:href="app.icon_url + '#layer1'"/>
                     </svg>

@@ -54,6 +54,11 @@ svg {
 .render-component {
     /* position: relative; */
 }
+
+.button-component {
+    margin: 4px !important;
+}
+
 .btn-close {
     position: absolute;
 }

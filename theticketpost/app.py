@@ -4,9 +4,9 @@ import theticketpost.logger
 import theticketpost.printer.ble
 import theticketpost.scheduler
 import theticketpost.applications
-import theticketpost.googleauth
+#import theticketpost.googleauth
 
-from flask import Flask, Response, render_template, request, jsonify, redirect, url_for
+from flask import Flask, Response, render_template, request, jsonify, redirect, url_for, session
 
 from loguru import logger
 
@@ -124,6 +124,10 @@ async def google_auth_get_token():
         return jsonify({'access_token': token})
 
     return Response("patata", status=200, mimetype='text/plain')
+
+#@app.route('/api/google-auth/oauth2callback')
+#async def google_oauth_callback():
+    
 
 
 @app.route('/api/printer/scan')

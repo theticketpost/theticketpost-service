@@ -10,11 +10,12 @@ import json
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'svg', 'png'}
 
 class Application(Thread):
-    def __init__(self, name, file, desc):
+    def __init__(self, name, file, desc, flaskApp):
         Thread.__init__(self)
         self.desc = desc
         self.name = name
         self.file = file
+        self.flaskApp = flaskApp
 
         self.blueprint = Blueprint(self.name + 'app_blueprint', self.name,
             template_folder='templates',

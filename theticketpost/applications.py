@@ -28,7 +28,7 @@ def load_module(path, desc,flaskApp):
     sys.modules[desc["name"]] = foo
     spec.loader.exec_module(foo)
 
-    app = foo.App(desc)
+    app = foo.App(desc, flaskApp)
     app.start()
     applications[desc["name"]] = app
     flaskApp.register_blueprint(app.blueprint)

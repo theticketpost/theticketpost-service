@@ -147,6 +147,9 @@ p { margin: 0; }
     gap: 24px;
 }
 .content.narrow { max-width: 1000px; }
+/* Pages that fit the window and scroll inside (log) */
+.content.fill { height: 100vh; height: 100dvh; }
+.content.fill > * { min-height: 0; }
 
 .page-head {
     display: flex;
@@ -714,8 +717,8 @@ select.field { padding-right: 8px; }
 /* ------------------------------------------------------------ log */
 
 .log-output {
-    flex: 1;
-    min-height: 60vh;
+    flex: 1 1 0;
+    min-height: 200px;
     margin: 0;
     padding: 20px;
     overflow: auto;
@@ -776,6 +779,7 @@ select.field { padding-right: 8px; }
     .nav-link.desktop-only { display: none; }
 
     .content { padding: 20px 16px 96px; }
+    .content.fill { height: calc(100dvh - 52px); }
     .page-title { font-size: 30px; }
     .tray { padding: 40px 8px 24px; }
     .side { max-width: none; position: static; max-height: none; overflow: visible; }

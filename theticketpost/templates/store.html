@@ -31,7 +31,7 @@
         <article v-for="app in visible" :key="app.desc.name" class="card">
             <div class="card-top">
                 <div class="icon-box lg">
-                    <svg class="app-icon" aria-hidden="true" style="width: 24px; height: 24px"><use :href="'/api/appstore/icon/' + app.desc.name + '#layer1'"/></svg>
+                    <svg class="app-icon" viewBox="0 0 16 16" aria-hidden="true" style="width: 24px; height: 24px"><use :href="'/api/appstore/icon/' + app.desc.name + '#layer1'"/></svg>
                 </div>
                 <span v-if="app.update" class="pill pill-info">Update</span>
             </div>

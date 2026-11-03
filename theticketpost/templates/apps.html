@@ -25,7 +25,7 @@
     <section v-if="apps.length" class="list" aria-label="Installed apps">
         <div v-for="app in apps" :key="app.name" class="app-row">
             <div class="icon-box">
-                <svg v-if="app.icon_url" class="app-icon" aria-hidden="true"><use :href="app.icon_url + '#layer1'"/></svg>
+                <svg v-if="app.icon_url" class="app-icon" viewBox="0 0 16 16" aria-hidden="true"><use :href="app.icon_url + '#layer1'"/></svg>
                 <svg v-else class="i" aria-hidden="true"><use href="#i-box"/></svg>
             </div>
             <div class="app-row-text">

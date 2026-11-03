@@ -125,7 +125,7 @@
                 <vuedraggable :list="renderable_apps" item-key="name" class="tiles" :group="{ name: 'sections', pull: 'clone', put: false }" :sort="false" :clone="new_section" :force-fallback="true">
                     <template #item="{ element: app }">
                         <button type="button" class="tile" @click="add(app.name)">
-                            <svg v-if="app.icon_url" class="app-icon" aria-hidden="true"><use :href="app.icon_url + '#layer1'"/></svg>
+                            <svg v-if="app.icon_url" class="app-icon" viewBox="0 0 16 16" aria-hidden="true"><use :href="app.icon_url + '#layer1'"/></svg>
                             <svg v-else class="i" aria-hidden="true" style="width: 22px; height: 22px"><use href="#i-box"/></svg>
                             { app.name }
                         </button>

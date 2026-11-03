@@ -315,9 +315,19 @@ const NewspaperApp = {
             }
             this.merge_target = target === this.dragged ? null : target;
         },
-        allow_move: function() {
-            // over a merge target: don't shuffle the sections around
-            return this.merge_target === null;
+        allow_move: function(event, original) {
+            // Sortable would swap as soon as the pointer touches the next
+            // section, pushing it away before its middle (the merge zone) can be
+            // reached. Swap only once the pointer is in the far quarter of the
+            // section, the side it is moving towards.
+            const point = original && (original.touches ? original.touches[0] : original);
+            if (!point || point.clientY === undefined) return this.merge_target === null;
+            this.track_merge(point);
+            if (this.merge_target !== null) return false;
+            const box = event.related.getBoundingClientRect();
+            const quarter = box.height / 4;
+            const moving_down = !!(event.dragged.compareDocumentPosition(event.related) & Node.DOCUMENT_POSITION_FOLLOWING);
+            return moving_down ? point.clientY >= box.bottom - quarter : point.clientY <= box.top + quarter;
         },
         merge: function(dragged, target) {
             const incoming = this.is_group(dragged) ? dragged.items : [dragged];

@@ -148,14 +148,21 @@ def chat_json(provider_id, messages, model=None):
     """chat() for a JSON object answer, parsed."""
     text = chat(provider_id, messages, model=model, json_output=True)
     try:
-        return json.loads(text)
+        data = json.loads(text)
     except ValueError as e:
         raise LLMError("The AI answer is not valid JSON") from e
+    if not isinstance(data, dict):
+        raise LLMError("The AI answer is not a JSON object")
+    return data
 
 
 def error_message(response):
     try:
-        error = response.json().get("error", {})
+        body = response.json()
+        # Gemini sends its errors inside a list: [{"error": {...}}]
+        if isinstance(body, list) and body:
+            body = body[0]
+        error = body.get("error", {}) if isinstance(body, dict) else body
         message = error.get("message") if isinstance(error, dict) else str(error)
     except ValueError:
         message = None

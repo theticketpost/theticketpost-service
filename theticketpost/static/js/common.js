@@ -13,10 +13,10 @@ const TTP = {
         return response.json();
     },
 
-    async postJSON(url, data) {
+    async postJSON(url, data, headers = {}) {
         return fetch(url, {
             method: "POST",
-            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            headers: { "Accept": "application/json", "Content-Type": "application/json", ...headers },
             body: JSON.stringify(data)
         });
     },

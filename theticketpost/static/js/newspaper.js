@@ -64,8 +64,11 @@ const NewspaperApp = {
             });
         }
 
-        // refresh components if required (of a random section, the one shown)
+        // refresh components if required (of a random section, the one shown).
+        // The printed page skips the sections that don't print today: for an app,
+        // being rendered there means being printed.
         this.apps.forEach((element) => {
+            if (!this.editable && !this.prints_on(element, this.weekday)) return;
             const section = this.current(element);
             if (section.appname && (section.refresh_component || !section.rawhtml)) {
                 this.render_component(section);
@@ -518,7 +521,9 @@ const NewspaperApp = {
             }
         },
         render_component: async function(element) {
-            const response = await TTP.postJSON('/api/apps/' + element.appname + '/component', element.config);
+            // X-TTP-Print: this render is the one being printed (not the editor's preview)
+            const headers = this.editable ? {} : { "X-TTP-Print": "1" };
+            const response = await TTP.postJSON('/api/apps/' + element.appname + '/component', element.config, headers);
             element.rawhtml = await response.text();
             await this.save_json();
         },

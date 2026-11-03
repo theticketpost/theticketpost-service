@@ -70,6 +70,10 @@ const NewspaperApp = {
         this.apps.forEach((element) => {
             if (!this.editable && !this.prints_on(element, this.weekday)) return;
             const section = this.current(element);
+            // the installed app decides, not the copy saved with the section (an
+            // older version of the app may have saved a different value)
+            const app = this.installed_apps.find((app) => app.name === section.appname);
+            if (app) section.refresh_component = !!app.refresh_component;
             if (section.appname && (section.refresh_component || !section.rawhtml)) {
                 this.render_component(section);
             }

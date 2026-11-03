@@ -102,6 +102,10 @@
                     <label v-else-if="input.type == 'text'" class="label">{ input.label }
                         <input type="text" class="field" v-model="input.value">
                     </label>
+                    <label v-else-if="input.type == 'textarea'" class="label">{ input.label }
+                        <span v-if="input.help" class="panel-sub">{ input.help }</span>
+                        <textarea class="field" rows="6" v-model="input.value" :placeholder="input.placeholder || ''"></textarea>
+                    </label>
                     <label v-else-if="input.type == 'select'" class="label">{ input.label }
                         <select class="field" v-model="input.value">
                             <option v-for="option in input.options" :value="option.value">{ option.description }</option>

@@ -295,6 +295,7 @@ p { margin: 0; }
 }
 .field.mono { font-family: var(--font-mono); }
 select.field { padding-right: 8px; }
+textarea.field { padding: 10px 12px; line-height: 1.45; resize: vertical; }
 
 .check-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
 .check { width: 20px; height: 20px; accent-color: var(--accent); }

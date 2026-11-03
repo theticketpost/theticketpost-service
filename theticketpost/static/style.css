@@ -326,6 +326,7 @@ select.field { padding-right: 8px; }
 .banner > span { flex: 1 1 260px; }
 .banner-warn { background: var(--warn-bg); border: 1px solid var(--warn-line); color: #7C2D12; }
 .banner-dark { background: var(--ink); color: #FFFFFF; }
+.banner-info { background: var(--info-bg); color: var(--info-ink); }
 
 .empty {
     display: flex;

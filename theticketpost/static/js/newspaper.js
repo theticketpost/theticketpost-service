@@ -10,6 +10,9 @@ const EMPTY_SECTION = Object.freeze({ appname: "", rawhtml: "", config: [] });
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_PLURALS = ["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"];
 
+// the editor's update notice stays closed until something newer comes out
+const UPDATES_DISMISSED_KEY = "ttp-updates-dismissed";
+
 const NewspaperApp = {
     components: {
         vuedraggable,
@@ -34,6 +37,9 @@ const NewspaperApp = {
             // the same objects on every render (see ticket.html)
             ticket_group: { name: 'sections', pull: false },
             tiles_group: { name: 'sections', pull: 'clone', put: false },
+            // new versions of the service and of installed apps (editor only)
+            updates: { core: null, apps: [] },
+            updates_dismissed: "",
         }
     },
     mounted() {
@@ -47,6 +53,7 @@ const NewspaperApp = {
         this.$watch('ticket_px_width', fit);
     },
     async created() {
+        if (this.editable) this.check_updates();
         await this.get_installed_apps();
         await this.get_json();
 
@@ -83,6 +90,22 @@ const NewspaperApp = {
         },
         today: function() {
             return new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+        },
+        // what the update notice is about, to tell when it changes
+        updates_key: function() {
+            const core = this.updates.core ? this.updates.core.latest : "";
+            return [core, ...this.updates.apps.map((app) => app.name + "@" + app.version)].join(",");
+        },
+        updates_message: function() {
+            const parts = [];
+            const core = this.updates.core;
+            if (core) parts.push(`TheTicketPost ${core.latest} is available (you have ${core.current}).`);
+            const apps = this.updates.apps;
+            if (apps.length) parts.push((apps.length === 1 ? "An update for " : "Updates for ") + apps.map((app) => app.name).join(", ") + ".");
+            return parts.join(" ");
+        },
+        show_updates: function() {
+            return this.updates_key !== "" && this.updates_key !== this.updates_dismissed;
         },
         renderable_apps: function() {
             return this.installed_apps.filter((app) => app.render_component);
@@ -150,6 +173,22 @@ const NewspaperApp = {
         }
     },
     methods: {
+        check_updates: async function() {
+            try { this.updates_dismissed = localStorage.getItem(UPDATES_DISMISSED_KEY) || ""; } catch (error) {}
+            try {
+                // right after starting, the store is still reading the catalog
+                for (let tries = 0; tries < 20; tries++) {
+                    const status = await TTP.getJSON("/api/appstore/status");
+                    if (!status.loading) break;
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                }
+                this.updates = await TTP.getJSON("/api/updates");
+            } catch (error) {}
+        },
+        dismiss_updates: function() {
+            this.updates_dismissed = this.updates_key;
+            try { localStorage.setItem(UPDATES_DISMISSED_KEY, this.updates_key); } catch (error) {}
+        },
         is_group: function(element) {
             return !!element && element.type === "group";
         },

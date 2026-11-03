@@ -21,7 +21,7 @@ import threading
 
 app = Flask(__name__)
 
-version = '1.1.0'
+version = '1.2.0'
 ble_scan_timout = 10
 port = 8080
 
@@ -242,6 +242,22 @@ def store_refresh():
 @app.route('/api/appstore/status')
 def store_status():
     return jsonify(theticketpost.appstore.status())
+
+
+@app.route('/api/updates')
+def updates():
+    """What the editor's update notice shows: a newer service version (or null)
+    and the installed apps with a newer version in the store."""
+    latest = theticketpost.appstore.core_version
+    try:
+        newer = bool(latest) and theticketpost.appstore.compare_version_number(latest, version) > 0
+    except ValueError:  # not a valid version number
+        newer = False
+    return jsonify({
+        "core": {"current": version, "latest": latest} if newer else None,
+        "apps": [{"name": name, "version": entry["desc"]["version"]}
+                 for name, entry in theticketpost.appstore.list().items() if entry["update"]],
+    })
 
 
 @app.route('/api/appstore/icon/<string:app_name>')

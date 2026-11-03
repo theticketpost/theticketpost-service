@@ -9,12 +9,17 @@ from packaging import version
 import threading
 import time
 import urllib.parse
+import re
 
 RAW_URL = "https://raw.githubusercontent.com/{repo}/{ref}/{path}"
 # The catalog is read again in the background every few hours, so new apps and
 # updates show up without restarting. Each read is one GitHub API call
 # (unauthenticated calls are limited to 60/hour).
 AUTO_REFRESH_SECONDS = 3 * 3600
+# The service checks for a newer version of itself in the same round. Reading
+# setup.py from raw.githubusercontent.com doesn't count against the API limit.
+CORE_REPOSITORY = "theticketpost/theticketpost-service"
+CORE_SETUP_URL = RAW_URL.format(repo=CORE_REPOSITORY, ref="main", path="setup.py")
 
 # Every app published in the repository: {name: {'desc': desc, 'path': path in the repo}}
 catalog = {}
@@ -30,6 +35,7 @@ checked_at = 0.0     # time.time() of the last read, failed or not
 loaded_at = 0.0      # time.time() of the last successful read
 last_error = ""
 auto_refresh_started = False
+core_version = ""    # latest published version of the service, "" until known
 
 
 def compare_version_number(a, b):
@@ -153,15 +159,30 @@ def load_catalog():
 
 
 
+def load_core_version():
+    global core_version
+    try:
+        response = requests.get(CORE_SETUP_URL, timeout=15)
+        response.raise_for_status()
+        match = re.search(r'version\s*=\s*"([^"]+)"', response.text)
+        if match:
+            core_version = match.group(1)
+    except requests.RequestException as e:
+        logger.warning(f"Could not check for a new version of the service: {e}")
+
+
+
 def load_catalog_safe():
     # A store failure (no network, GitHub rate limit...) must not affect the service;
     # the previous catalog stays
     global loading, checked_at, loaded_at, last_error
     try:
-        # False: the repository changed in Settings during the read, read the new one
-        while not load_catalog():
-            pass
-        loaded_at = time.time()
+        load_core_version()
+        if repository_name:
+            # False: the repository changed in Settings during the read, read the new one
+            while not load_catalog():
+                pass
+            loaded_at = time.time()
         last_error = ""
     except Exception as e:
         last_error = str(e)
@@ -176,8 +197,6 @@ def refresh(max_age=0):
     """Reads the catalog again in the background, unless the last read is less
     than max_age seconds old. Returns True when a read is going on."""
     global loading
-    if not repository_name:
-        return False
     with refresh_lock:
         if loading:
             return True
@@ -227,7 +246,6 @@ def init(flaskApp):
     repository_name = config.get('repository', {}).get('name', "")
     if not repository_name:
         logger.warning("No apps repository configured, the app store will be empty")
-        return
 
     refresh()
     if not auto_refresh_started:

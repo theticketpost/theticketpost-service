@@ -29,6 +29,19 @@
         <a class="btn btn-dark" href="{{ url_for('settings') }}">Set up printer</a>
     </div>
 
+    <div v-if="show_updates" class="banner banner-info" role="status">
+        <svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>
+        <span>{ updates_message }</span>
+        <a v-if="updates.core" class="btn btn-ghost" href="https://github.com/theticketpost/theticketpost-service#updating" target="_blank" rel="noopener">
+            <svg class="i" aria-hidden="true"><use href="#i-github"/></svg>
+            How to update
+        </a>
+        <a v-if="updates.apps.length" class="btn btn-dark" href="{{ url_for('store') }}">Open store</a>
+        <button type="button" class="btn-icon" @click="dismiss_updates()" aria-label="Hide until there are newer updates" title="Hide until there are newer updates">
+            <svg class="i" aria-hidden="true"><use href="#i-x"/></svg>
+        </button>
+    </div>
+
     <div class="editor">
 
         <section class="tray" ref="tray" aria-label="Ticket preview" @click.self="selected = null">

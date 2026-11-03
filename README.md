@@ -37,6 +37,19 @@ $bash> docker run -d -p 8080:8080 -v theticketpost-data:/data theticketpost-serv
 
 See [docker/README.md](docker/README.md) for compose, Bluetooth printing and local apps.
 
+## Updating
+
+The editor shows a notice when a new version of the service, or an update for an installed app, is available. Apps are updated from the store. To update the service:
+
+```bash
+$bash> cd theticketpost-service
+$bash> git pull
+$bash> xargs rm -rf < files.txt
+$bash> python3 setup.py install --record files.txt
+```
+
+Then restart `theticketpost-service`. With Docker, `git pull`, build the image again and recreate the container: your settings and apps stay in the `theticketpost-data` volume.
+
 ## Applications
 **theticketpost-service** will load automatically all the applications located in the folder `~/.theticketpost/apps`. So place there the applications you desire to load from the [apps repository](https://github.com/theticketpost/theticketpost-apps) or create a symbolic link named `apps` in `~/.theticketpost` pointing to the **apps repository folder** to load all the applications hosted in the repo.
 

@@ -1,0 +1,9 @@
+# Used by BuildKit when building with -f docker/Dockerfile (context: repository root)
+*
+!setup.py
+!pyproject.toml
+!MANIFEST.in
+!README.md
+!theticketpost/
+**/__pycache__
+**/*.pyc

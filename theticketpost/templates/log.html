@@ -3,20 +3,20 @@
 {% set active_page = 'log' %}
 
 {% block content %}
-<div id="log-app" class="h-100">
-    <div class="p-5 col container-fluid d-flex h-100 flex-column h-100">
-        <div class="row">
-            <div class="col d-flex justify-content-end px-0 my-1">
-                <button class="btn btn-primary align-self-end mx-1" type="button" @click="autoscroll = !autoscroll">
-                    Autoscroll { autoscroll ? ' on':' off' }
-                </button>
-                <button class="btn btn-danger align-self-end" type="button" @click="clear_log()">
-                    Clear Log
-                </button>
-            </div>
+<div id="log-app" class="stack" style="flex: 1" v-cloak>
+    <header class="page-head">
+        <div>
+            <span class="eyebrow">Live service output</span>
+            <h1 class="page-title">Log</h1>
         </div>
-        <pre id="output" class="row text-left bg-dark text-light p-4 overflow-auto" style="flex: 1;"></pre>
-    </div>
+        <div class="actions">
+            <button type="button" class="btn btn-ghost" :aria-pressed="autoscroll" @click="autoscroll = !autoscroll">
+                Autoscroll { autoscroll ? 'on' : 'off' }
+            </button>
+            <button type="button" class="btn btn-danger" @click="clear_log()">Clear log</button>
+        </div>
+    </header>
+    <pre id="output" class="log-output" tabindex="0" aria-label="Log output"></pre>
 </div>
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/log.js') }}"></script>

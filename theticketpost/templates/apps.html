@@ -3,87 +3,135 @@
 {% set active_page = 'apps' %}
 
 {% block content %}
-<div class="p-5 text-center">
-    <h1>My Apps</h1>
-</div>
-<div class="container px-4">
-    <div id="apps-app">
+<div id="apps-app" class="stack" v-cloak>
 
-        <div class="row">
-            <div v-for="app in apps" class="col-auto mb-3">
-                <div class="card" style="width: 18rem;">
-                    <div class="card-body">
-                        <h5 class="card-title text-capitalize">{ app.name }</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">v{ app.version }</h6>
-                        <p class="card-text">{ app.description }</p>
-                        <button type="button" class="btn btn-primary" v-bind:data-component-id="app.name" data-bs-toggle="modal" data-bs-target="#theModal" v-if="app.configuration">Settings</button>
-                    </div>
+    <header class="page-head">
+        <div>
+            <span class="eyebrow">{ apps.length } installed<template v-if="needing_setup.length"> · { needing_setup.length } need setup</template></span>
+            <h1 class="page-title">My apps</h1>
+        </div>
+        <a class="btn btn-dark" href="{{ url_for('store') }}">
+            <svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>
+            Get more apps
+        </a>
+    </header>
+
+    <div v-if="needing_setup.length" class="banner banner-warn" role="status">
+        <svg class="i" aria-hidden="true"><use href="#i-warn"/></svg>
+        <span v-if="needing_setup.length == 1"><span style="text-transform: capitalize">{ needing_setup[0].name }</span> needs setting up before it can print.</span>
+        <span v-else>{ needing_setup.map((app) => app.name).join(", ") } need setting up before they can print.</span>
+    </div>
+
+    <section v-if="apps.length" class="list" aria-label="Installed apps">
+        <div v-for="app in apps" :key="app.name" class="app-row">
+            <div class="icon-box">
+                <svg v-if="app.icon_url" class="app-icon" aria-hidden="true"><use :href="app.icon_url + '#layer1'"/></svg>
+                <svg v-else class="i" aria-hidden="true"><use href="#i-box"/></svg>
+            </div>
+            <div class="app-row-text">
+                <div class="app-row-name"><span class="app-name">{ app.name }</span><span class="app-meta">v{ app.version }</span></div>
+                <div class="app-desc">{ app.description }</div>
+            </div>
+
+            <span v-if="app.needs_setup" class="pill pill-warn">Needs setup</span>
+            <a v-else-if="updates[app.name]" class="pill pill-info" href="{{ url_for('store') }}">Update v{ updates[app.name] }</a>
+            <span v-else class="pill pill-ok">Ready</span>
+
+            <template v-if="confirming === app.name">
+                <div class="confirm">
+                    Remove { app.name }?
+                    <button type="button" class="btn btn-danger" @click="uninstall(app.name)" :disabled="removing">
+                        <span v-if="removing" class="spinner" aria-hidden="true"></span>
+                        Remove
+                    </button>
+                    <button type="button" class="btn btn-ghost" @click="confirming = null">Cancel</button>
                 </div>
+            </template>
+            <template v-else>
+                <button v-if="app.configuration" type="button" class="btn" :class="app.needs_setup ? 'btn-accent-outline' : 'btn-ghost'" @click="open_settings(app.name)">
+                    { app.needs_setup ? 'Configure' : 'Settings' }
+                </button>
+                <button type="button" class="btn-icon" :aria-label="'Uninstall ' + app.name" title="Uninstall" @click="confirming = app.name">
+                    <svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>
+                </button>
+            </template>
+        </div>
+    </section>
+
+    <div v-else-if="loaded" class="panel empty">
+        <p>No apps installed yet.</p>
+        <a class="btn btn-primary" href="{{ url_for('store') }}">Open the app store</a>
+    </div>
+
+    <!-- App settings -->
+    <div v-if="componentId" class="modal-backdrop" @click.self="close_settings()">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <h2 id="settings-title" class="modal-title">{ componentId } settings</h2>
+
+            <template v-for="(input, index) in template">
+                <label v-if="input.type == 'checkbox'" class="check-row">
+                    { input.label }
+                    <input type="checkbox" class="check" v-model="input.value">
+                </label>
+                <label v-else-if="input.type == 'number'" class="label">{ input.label }
+                    <input type="number" class="field" v-model="input.value">
+                </label>
+                <label v-else-if="input.type == 'text' && input.name != 'model'" class="label">{ input.label }
+                    <input type="text" class="field" :class="{ mono: /key|token/i.test(input.name) }" v-model="input.value">
+                </label>
+                <label v-else-if="input.type == 'select'" class="label">{ input.label }
+                    <select class="field" v-model="input.value">
+                        <option v-for="option in input.options" :value="option.value">{ option.description }</option>
+                    </select>
+                </label>
+                <div v-else-if="input.type === 'llm-provider'" class="label">{ input.label }
+                    <select v-if="usable_providers(input).length" class="field" v-model="input.value" @change="provider_changed()">
+                        <option v-for="provider in usable_providers(input)" :value="provider.id">
+                            { provider.name }{ provider.configured ? '' : ' (not set up)' }
+                        </option>
+                    </select>
+                    <span class="panel-sub">
+                        <template v-if="!usable_providers(input).length">No AI provider set up yet. </template>
+                        Add API keys in <a href="{{ url_for('settings') }}">Settings › AI providers</a>.
+                    </span>
+                </div>
+                <label v-else-if="input.type == 'text' && input.name == 'model'" class="label">{ input.label }
+                    <input type="text" class="field mono" v-model.trim="input.value" :placeholder="default_model() ? default_model() + ' (default)' : ''">
+                </label>
+                <div v-else-if="input.type === 'url-list'" class="label">{ input.label }
+                    <span v-if="input.help" class="panel-sub">{ input.help }</span>
+                    <div v-for="(entry, entryIndex) in input.value" :key="entryIndex" class="url-row">
+                        <input type="text" class="field" v-model.trim="entry.name" placeholder="Name" :aria-label="'Name ' + (entryIndex + 1)">
+                        <input type="text" class="field mono" v-model.trim="entry.url" placeholder="https://…" :aria-label="'Address ' + (entryIndex + 1)">
+                        <button type="button" class="btn-icon" @click="input.value.splice(entryIndex, 1)" :aria-label="'Remove ' + (entry.name || 'entry ' + (entryIndex + 1))">
+                            <svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-ghost" style="align-self: flex-start" @click="input.value.push({ name: '', url: '' })">
+                        <svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>
+                        Add
+                    </button>
+                </div>
+                <div v-else-if="input.type === 'google-credentials'" class="label">
+                    { input.label }
+                    <input type="file" class="field" @change="handleCredentialUpload($event, index)" accept=".json" style="padding-top: 10px">
+                    <table v-if="input.value.length" class="table">
+                        <thead><tr><th>Account name</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                        <tbody>
+                            <tr v-for="(credential, credentialIndex) in input.value" :key="credentialIndex">
+                                <td><input type="text" class="field" v-model="credential.name" aria-label="Account name"></td>
+                                <td><button type="button" class="btn btn-danger" @click="deleteCredential(input.value, credentialIndex)">Delete</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" @click="close_settings()">Cancel</button>
+                <button type="button" class="btn btn-dark" @click="save_app_settings()">Save</button>
             </div>
         </div>
-
-        <div class="modal fade" id="theModal" tabindex="-1" aria-labelledby="theModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 id="app-configuration-title" class="modal-title">Setup for {componentId}</h5>
-                    </div>
-                    <div class="modal-body">
-                        <form id="app-configuration-form">
-                            <div v-for="(input, index) in template">
-                                <div v-if="input.type == 'checkbox'" class="my-4 form-check">
-                                    <input type="checkbox" class="form-check-input" id="{input.name}" v-model="input.value">
-                                    <label class="form-check-label" for="{input.name}">{input.label}</label>
-                                </div>
-                                <div v-else-if="input.type == 'number'" class="my-4">
-                                    <label for="{input.name}" class="form-label">{input.label}</label>
-                                    <input type="number" class="form-control" id="{input.name}" v-model="input.value" >
-                                </div>
-                                <div v-else-if="input.type == 'text'" class="my-4">
-                                    <label for="{input.name}" class="form-label">{input.label}</label>
-                                    <input type="text" class="form-control" id="{input.name}" v-model="input.value" >
-                                </div>
-                                <div v-else-if="input.type == 'select'" class="my-4">
-                                    <label :for="input.name" class="form-label">{input.label}</label>
-                                    <select class="form-select" class="form-control" v-model="input.value">
-                                        <option v-for="option in input.options" :value="option.value" :selected="input.value == option.value">
-                                          { option.description }
-                                        </option>
-                                    </select>
-                                </div>
-                                <div v-else-if="input.type === 'google-credentials'" class="my-4">
-                                    <label for="{input.name}" class="form-label">{input.label}</label>
-                                    <input type="file" class="form-control" id="{input.name}" @change="handleCredentialUpload($event, index)" accept=".json">
-                                    <table class="table table-bordered mt-3">
-                                        <thead>
-                                            <tr>
-                                                <th>Account Name</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="(credential, credentialIndex) in input.value" :key="index">
-                                                <td>
-                                                    <input type="text" class="form-control" v-model="credential.name">
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-danger" @click.prevent="deleteCredential(input.value, credentialIndex)">Delete</button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="save_app_settings()">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 

@@ -1,10 +1,64 @@
+/* The ticket, shared by the editor preview and the page that gets printed.
+   App components were designed on top of Bootstrap 5.1's reboot, so these
+   rules reproduce it inside #newspaper to keep printed tickets unchanged.
+   :where() keeps them as weak as Bootstrap's element selectors, so app styles
+   still win (e.g. sudoku's `ul { padding: 0 }` over the 2rem list padding). */
+
 #newspaper {
-    min-height: 0px !important;
-    border: 0px !important;
-    background-color: white !important;
+    background-color: #FFFFFF;
+    color: #212529;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    -webkit-text-size-adjust: 100%;
 }
 
-.list-group-item {
-    border: 0px !important;
-    border-radius: 0px !important;
+:where(#newspaper) *, :where(#newspaper) *::before, :where(#newspaper) *::after { box-sizing: border-box; }
+
+:where(#newspaper) p { margin-top: 0; margin-bottom: 1rem; }
+
+:where(#newspaper) h1, :where(#newspaper) h2, :where(#newspaper) h3, :where(#newspaper) h4, :where(#newspaper) h5, :where(#newspaper) h6 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
 }
+:where(#newspaper) h1 { font-size: calc(1.375rem + 1.5vw); }
+:where(#newspaper) h2 { font-size: calc(1.325rem + 0.9vw); }
+:where(#newspaper) h3 { font-size: calc(1.3rem + 0.6vw); }
+:where(#newspaper) h4 { font-size: calc(1.275rem + 0.3vw); }
+:where(#newspaper) h5 { font-size: 1.25rem; }
+:where(#newspaper) h6 { font-size: 1rem; }
+
+:where(#newspaper) hr { margin: 1rem 0; color: inherit; background-color: currentColor; border: 0; opacity: 0.25; }
+:where(#newspaper) hr:not([size]) { height: 1px; }
+
+:where(#newspaper) ul, :where(#newspaper) ol { padding-left: 2rem; margin-top: 0; margin-bottom: 1rem; }
+:where(#newspaper) b, :where(#newspaper) strong { font-weight: bolder; }
+:where(#newspaper) small { font-size: 0.875em; }
+:where(#newspaper) img, :where(#newspaper) svg { vertical-align: middle; }
+:where(#newspaper) table { caption-side: bottom; border-collapse: collapse; }
+:where(#newspaper) th { text-align: inherit; }
+
+/* one block per app section, laid out like the old Bootstrap .card it replaces:
+   apps position content against .ticket-body (e.g. sudoku's absolute grid) */
+#newspaper .ticket-list { display: flex; flex-direction: column; }
+#newspaper .ticket-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+}
+/* the section's content: same box the .ticket-item was before the editor
+   could put a bar above it (random sections), so printed tickets don't change */
+#newspaper .ticket-body {
+    position: relative;
+    padding-bottom: 1em;
+}
+
+/* sections left out of today's print (an app with nothing to show, or a title
+   tied to it). Only the print page gets this class; the editor dims them. */
+#newspaper .ticket-item.not-printed { display: none; }

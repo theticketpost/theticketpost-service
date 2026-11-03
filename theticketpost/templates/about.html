@@ -1,9 +1,29 @@
 {% extends 'base.html' %}
 
 {% set active_page = 'about' %}
+{% set narrow = true %}
 
 {% block content %}
-<div class="p-5 text-center">
-    <h1>About</h1>
-</div>
+<header class="page-head">
+    <div>
+        <span class="eyebrow">Version {{ version }}</span>
+        <h1 class="page-title">About</h1>
+    </div>
+</header>
+
+<section class="panel">
+    <p><img class="logo-ink" src="{{ url_for('static', filename='theticketpost_horizontal_white.svg') }}" alt="TheTicketPost"></p>
+    <p>A custom newspaper every day, printed on a thermal receipt printer. Pick the sections you want from the apps, arrange them on the ticket and print it now or on a schedule.</p>
+    <p class="panel-sub">By David Antúnez, Bruno Cabado and David Maseda.</p>
+    <div class="actions">
+        <a class="btn btn-ghost" href="https://github.com/theticketpost/theticketpost-service">
+            <svg class="i" aria-hidden="true"><use href="#i-github"/></svg>
+            Service on GitHub
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/theticketpost/theticketpost-apps">
+            <svg class="i" aria-hidden="true"><use href="#i-github"/></svg>
+            Apps on GitHub
+        </a>
+    </div>
+</section>
 {% endblock %}

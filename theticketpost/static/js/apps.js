@@ -4,97 +4,113 @@ const { createApp } = Vue
 const AppsApp = {
     data() {
         return {
+            loaded: false,
             apps: [],
+            updates: {},
             template: [],
-            componentId: ""
+            componentId: "",
+            confirming: null,
+            removing: false,
+            providers: []
         }
     },
     mounted() {
         this.get_installed_apps();
-
-        let element = document.getElementById('theModal');
-        element.addEventListener('show.bs.modal', async (e) => {
-            let componentId = e.relatedTarget.getAttribute('data-component-id');
-            this.get_app_form(componentId);
+        this.get_updates();
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && this.componentId) this.close_settings();
         });
     },
     delimiters: ['{', '}'],
+    computed: {
+        needing_setup: function() {
+            return this.apps.filter((app) => app.needs_setup);
+        }
+    },
     methods: {
-        get_app_form: async function( componentId ) {
-            let response = await fetch('/api/apps/' + componentId + '/configuration')
-            let jsonData = await response.json();
-            this.template = jsonData;
+        open_settings: async function(componentId) {
+            this.template = await TTP.getJSON('/api/apps/' + componentId + '/configuration');
+            this.template.forEach((input) => {
+                if (input.type === 'url-list' && !Array.isArray(input.value)) input.value = [];
+            });
+            if (this.template.some((input) => input.type === 'llm-provider')) {
+                try { this.providers = await TTP.getJSON('/api/llm/providers'); } catch (error) {}
+            }
             this.componentId = componentId;
         },
-        get_app_settings: async function(componentId) {
-            console.log( componentId );
+        usable_providers: function(input) {
+            // the ones with a key, plus the one the app has now so the select shows it
+            return this.providers.filter((provider) => provider.configured || provider.id === input.value);
+        },
+        default_model: function() {
+            const input = this.template.find((input) => input.type === 'llm-provider');
+            const provider = input && this.providers.find((provider) => provider.id === input.value);
+            return provider ? provider.default_model : '';
+        },
+        provider_changed: function() {
+            // a model name only makes sense for its provider
+            const model = this.template.find((input) => input.name === 'model');
+            if (model) model.value = '';
+        },
+        close_settings: function() {
+            this.componentId = "";
+            this.template = [];
         },
         save_app_settings: async function() {
-            const response = await fetch('/api/settings/config?app=' + this.componentId, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.template)
-            });
-
-            this.$toast.open({
-                message: "Settings for " + this.componentId + " updated",
-                type: "success",
-                duration: 5000,
-                position: "top-right",
-                dismissible: true
-            })
-
+            const response = await TTP.postJSON('/api/settings/config?app=' + this.componentId, this.template);
+            TTP.toast(this, response.ok ? "Settings for " + this.componentId + " saved" : "Could not save the settings", response.ok ? "success" : "error");
+            this.close_settings();
+            this.get_installed_apps();
+        },
+        uninstall: async function(app_name) {
+            this.removing = true;
+            const response = await fetch('/api/apps/uninstall/' + app_name);
+            TTP.toast(this, await response.text(), response.ok ? "success" : "error");
+            this.removing = false;
+            this.confirming = null;
+            this.get_installed_apps();
         },
         deleteCredential(credentials, index) {
-            console.log(index);
             credentials.splice(index, 1);
         },
         handleCredentialUpload: function(event, index) {
             const file = event.target.files[0];
             const reader = new FileReader();
-            var self = this;
-            reader.onload = () => {
+            reader.onload = async () => {
                 const obj = {
                     name: '',
                     credential: JSON.parse(reader.result),
                     token: ''
                 };
-
-                fetch("/api/google-auth/get-token", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({credential: obj.credential, scopes: self.template[index].scopes}),
-                  })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      console.log("Token received:", data.access_token);
-                      obj.token = data.access_token
-                      self.template[index].value.push(obj)
-                    })
-                    .catch((error) => {
-                      console.error("Error:", error);
-                    });
+                try {
+                    const response = await TTP.postJSON("/api/google-auth/get-token", { credential: obj.credential, scopes: this.template[index].scopes });
+                    const data = await response.json();
+                    obj.token = data.access_token;
+                    this.template[index].value.push(obj);
+                } catch (error) {
+                    TTP.toast(this, "Could not get a Google token", "error");
+                }
             };
             reader.readAsText(file);
         },
         get_installed_apps: async function() {
-            let response = await fetch('/api/apps/installed', {
-                method: 'GET'
-            });
-            let jsonData = await response.json();
-
-            if (Array.isArray(jsonData)) {
-                this.apps = jsonData;
+            const json = await TTP.getJSON('/api/apps/installed');
+            if (Array.isArray(json)) {
+                this.apps = json;
             }
+            this.loaded = true;
+        },
+        get_updates: async function() {
+            try {
+                const store = await TTP.getJSON('/api/appstore/apps');
+                const updates = {};
+                store.filter((app) => app.update).forEach((app) => { updates[app.desc.name] = app.desc.version; });
+                this.updates = updates;
+            } catch (error) {}
         }
     }
 }
 
 const app = createApp(AppsApp);
-app.mount('#apps-app');
 app.use(VueToast.ToastPlugin);
+app.mount('#apps-app');

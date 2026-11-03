@@ -5,12 +5,16 @@ from loguru import logger
 import time
 import schedule
 
+DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+DEFAULT_PORT = 8080
+
+
 class Scheduler(Thread):
     def __init__(self, config):
-        Thread.__init__(self)
+        Thread.__init__(self, daemon=True)
         logger.info("Starting scheduler...")
-        self.set_schedule(config)
         self.config = config
+        self.set_schedule(config)
         logger.info("Scheduler started")
 
     def run(self):
@@ -20,10 +24,10 @@ class Scheduler(Thread):
 
     def print_newspaper(self):
         logger.info("Initializing scheduler callback")
-        if ("printer" in self.config and self.config["printer"]["device"]):
-            port = self.config["webserver"]["port"]
-            address = self.config["printer"]["device"]["address"]
-            theticketpost.newspaper.print(address, port)
+        device = self.config.get("printer", {}).get("device")
+        if device:
+            port = self.config.get("webserver", {}).get("port", DEFAULT_PORT)
+            theticketpost.newspaper.print(device["address"], port)
         else:
             logger.error("Printer not configured")
 
@@ -31,17 +35,13 @@ class Scheduler(Thread):
     def set_schedule(self, config):
         self.config = config
         schedule.clear()
-        if ( "schedule" in config ):
-            if config["schedule"]["monday"]["active"]:
-                schedule.every().monday.at(config["schedule"]["monday"]["time"]).do(self.print_newspaper)
-            if config["schedule"]["tuesday"]["active"]:
-                schedule.every().tuesday.at(config["schedule"]["tuesday"]["time"]).do(self.print_newspaper)
-            if config["schedule"]["wednesday"]["active"]:
-                schedule.every().wednesday.at(config["schedule"]["wednesday"]["time"]).do(self.print_newspaper)
-            if config["schedule"]["thursday"]["active"]:
-                schedule.every().thursday.at(config["schedule"]["thursday"]["time"]).do(self.print_newspaper)
-            if config["schedule"]["friday"]["active"]:
-                schedule.every().friday.at(config["schedule"]["friday"]["time"]).do(self.print_newspaper)
-            if config["schedule"]["saturday"]["active"]:
-                schedule.every().saturday.at(config["schedule"]["saturday"]["time"]).do(self.print_newspaper)
-        return
+        days = config.get("schedule", {})
+        for day in DAYS:
+            entry = days.get(day) or {}
+            if not entry.get("active"):
+                continue
+            try:
+                getattr(schedule.every(), day).at(entry.get("time", "")).do(self.print_newspaper)
+                logger.info(f"Newspaper scheduled on {day} at {entry['time']}")
+            except schedule.ScheduleValueError as e:
+                logger.error(f"Invalid time for {day}: {e}")

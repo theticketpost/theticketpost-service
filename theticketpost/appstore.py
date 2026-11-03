@@ -1,0 +1,161 @@
+import theticketpost.settings
+import theticketpost.applications
+import os
+from loguru import logger
+from github import Github
+import requests
+import json
+from packaging import version
+import threading
+import urllib.parse
+
+RAW_URL = "https://raw.githubusercontent.com/{repo}/{ref}/{path}"
+
+# Every app published in the repository: {name: {'desc': desc, 'path': path in the repo}}
+catalog = {}
+apps_folder = ""
+repository_name = ""
+branch = ""
+repo_files = []
+
+
+def compare_version_number(a, b):
+    if version.parse(a) > version.parse(b):
+        return 1
+    elif version.parse(a) < version.parse(b):
+        return -1
+    else:
+        return 0
+
+
+def list():
+    """Apps that are not installed or have a newer version in the repository."""
+    available = {}
+    for name, entry in catalog.items():
+        installed = theticketpost.applications.get(name)
+        if installed is None:
+            available[name] = {'update': False, **entry}
+        elif compare_version_number(installed.desc.get('version', '0'), entry['desc']['version']) < 0:
+            available[name] = {'update': True, **entry}
+    return available
+
+
+
+def write_file(bytes_file, dest_path):
+    with open(dest_path, 'wb') as f:
+        f.write(bytes_file)
+
+
+
+def repo_get_file(path):
+    url = RAW_URL.format(repo=repository_name, ref=branch, path=urllib.parse.quote(path))
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    return response.content
+
+
+
+def repo_download_app(path):
+    for file_path in repo_files:
+        if file_path.startswith(path + "/"):
+            dest_path = os.path.join(apps_folder, file_path)
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            write_file(repo_get_file(file_path), dest_path)
+
+
+
+icons = {}
+
+def get_icon(app_name):
+    """icon.svg of a store app (the UI can't <use> an svg from another origin)"""
+    entry = catalog.get(app_name)
+    if entry is None:
+        return None
+    path = entry['path'] + '/static/icon.svg'
+    if path not in repo_files:
+        return None
+    if path not in icons:
+        icons[path] = repo_get_file(path)
+    return icons[path]
+
+
+
+def install_application(app_name):
+    """Returns (http code, message, restart needed)."""
+    available = list()
+    if app_name not in available:
+        return 500, "Application not found", False
+
+    entry = available[app_name]
+    action = 'updated' if entry["update"] else 'installed'
+
+    # Files are written over the existing folder, so config.json and uploaded files are kept
+    app_folder = os.path.join(apps_folder, entry['path'])
+    try:
+        os.makedirs(app_folder, exist_ok=True)
+        repo_download_app( entry['path'] )
+        restart_needed = theticketpost.applications.load_module(app_folder, entry['desc'])
+    except Exception as e:
+        logger.exception(f"Error installing {app_name}")
+        return 500, f"Error installing {app_name}: {e}", False
+
+    if restart_needed:
+        return 200, f"Application {action}. Restart the service to use its updated libraries", True
+
+    return 200, f"Application {action} successfully", False
+
+
+
+def load_catalog():
+    """One GitHub API call lists the whole repository (unauthenticated calls are limited
+    to 60/hour); files are downloaded from raw.githubusercontent.com."""
+    global repo_files, branch, catalog
+
+    repo = Github(retry=None, timeout=15).get_repo(repository_name)
+    branch = repo.default_branch
+    tree = repo.get_git_tree(branch, recursive=True)
+    repo_files = [element.path for element in tree.tree if element.type == "blob"]
+
+    apps = {}
+    for file_path in repo_files:
+        folder, _, filename = file_path.partition("/")
+        if filename == "desc.json" and not folder.startswith("{{"):
+            try:
+                desc = json.loads(repo_get_file(file_path))
+                apps[desc['name']] = {'desc': desc, 'path': folder}
+            except (ValueError, KeyError, requests.RequestException) as e:
+                logger.error(f"Invalid app description in {file_path}: {e}")
+    catalog = apps
+    icons.clear()
+    logger.info(f"App store loaded {len(catalog)} applications from {repository_name}")
+
+
+
+def load_catalog_safe():
+    # A store failure (no network, GitHub rate limit...) must not affect the service
+    try:
+        load_catalog()
+    except Exception as e:
+        logger.error(f"Could not load the app store from {repository_name}: {e}")
+
+
+
+def init(flaskApp):
+    global apps_folder
+    global repository_name
+    global catalog
+
+    catalog = {}
+
+    # Folder where applications will be installed
+    apps_folder = os.path.join(theticketpost.settings.get_storage_path(), "apps")
+    os.makedirs(apps_folder, exist_ok=True)
+
+    # Get repository name configured in theticketpost settings file
+    config = theticketpost.settings.get_json("config")
+    repository_name = config.get('repository', {}).get('name', "")
+    if not repository_name:
+        logger.warning("No apps repository configured, the app store will be empty")
+        return
+
+    threading.Thread(target=load_catalog_safe, name="appstore", daemon=True).start()

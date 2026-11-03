@@ -7,17 +7,89 @@ from pyppeteer import launch
 from PIL import Image
 from loguru import logger
 import os
+import shutil
+import threading
+
+# one print at a time: two jobs on the same BLE connection interleave their data
+print_lock = threading.Lock()
+
+CHROMIUM_CANDIDATES = ['chromium', 'chromium-browser', 'google-chrome', 'google-chrome-stable']
+
+
+
+def sections(newspaper):
+    """Every section of the ticket, including the alternatives inside random
+    sections ({"type": "group", "items": [...]})."""
+    for item in newspaper if isinstance(newspaper, list) else []:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "group":
+            yield from (section for section in item.get("items", []) if isinstance(section, dict))
+        else:
+            yield item
+
+
+def delete_app_from_ticket(app_name):
+    json = theticketpost.settings.get_json("newspaper")
+    if not isinstance(json, list):
+        return
+    kept = []
+    for item in json:
+        if item.get("type") == "group":
+            item["items"] = [section for section in item.get("items", []) if section.get("appname") != app_name]
+            if not item["items"]:
+                continue
+            if len(item["items"]) == 1:
+                # one alternative left: it's an ordinary section again
+                kept.append(item["items"][0])
+                continue
+            item["shown"] = min(item.get("shown", 0), len(item["items"]) - 1)
+        elif item.get("appname") == app_name:
+            continue
+        kept.append(item)
+    for index, item in enumerate(kept):
+        item["id"] = index
+    theticketpost.settings.save_json("newspaper", kept)
+
+
+def chromium_path():
+    """Browser used to render the ticket: `renderer.chromium_path` in config.json,
+    else the system one. pyppeteer's own download doesn't work on ARM (Raspberry Pi)."""
+    config = theticketpost.settings.get_json("config")
+    path = config.get("renderer", {}).get("chromium_path")
+    if path:
+        return path
+    for candidate in CHROMIUM_CANDIDATES:
+        path = shutil.which(candidate)
+        if path:
+            return path
+    return None
+
 
 async def to_img_thread(path, port):
 
     # launch chromium browser in the background
+    options = {}
+    executable = chromium_path()
+    if executable:
+        options["executablePath"] = executable
     browser = await launch(
         handleSIGINT=False,
         handleSIGTERM=False,
         handleSIGHUP=False,
+        autoClose=False,
         headless=True,
-        args=["--no-sandbox"]
+        # --disable-dev-shm-usage: /dev/shm is tiny in containers and makes Chromium crash
+        args=["--no-sandbox", "--disable-dev-shm-usage"],
+        **options
     )
+    try:
+        await screenshot_newspaper(browser, path, port)
+    finally:
+        await browser.close()
+
+
+async def screenshot_newspaper(browser, path, port):
     # open a new tab in the browser
     page = await browser.newPage()
     # add URL to a new page and then open it
@@ -38,28 +110,44 @@ async def to_img_thread(path, port):
 
     # create a screenshot of the page and save it
     await page.screenshot({"path": path})
-    # close the browser
-    await browser.close()
 
 
 def to_img(path, port):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(to_img_thread(path, port))
+    asyncio.run(to_img_thread(path, port))
 
 
 def print(address, port):
+    if not print_lock.acquire(blocking=False):
+        logger.warning("A ticket is already printing, ignoring the new request")
+        return 409, "A ticket is already printing"
+    try:
+        return print_locked(address, port)
+    finally:
+        print_lock.release()
+
+
+def print_locked(address, port):
     path = os.path.join(theticketpost.settings.get_storage_path(), 'last_newspaper.png')
-    to_img(path, port)
+    try:
+        to_img(path, port)
+    except Exception as e:
+        logger.error(f"Error rendering the ticket: {e}")
+        return 500, str(e)
     logger.info("Ticket rendered and saved in folder " + path)
 
     with Image.open(path) as img:
+        # the printer needs lines of exactly dots_per_line pixels: a wider or
+        # narrower image prints as garbage
+        device = theticketpost.settings.get_json("config").get("printer", {}).get("device", {})
+        width = int(device.get("dots_per_line", 384))
+        if img.width != width:
+            logger.warning(f"Ticket is {img.width}px wide, the printer needs {width}px: resizing")
+            img = img.resize((width, round(img.height * width / img.width)))
         dithered = img.convert("1")
         logger.info("Applied Floyd-Steinberg dither...")
         data = theticketpost.printer.cmd.cmds_print_img( dithered )
-        loop = asyncio.get_event_loop()
         try:
-            loop.run_until_complete(theticketpost.printer.ble.send_data(address, data))
+            asyncio.run(theticketpost.printer.ble.send_data(address, data))
         except Exception as e:
             return 500, str(e)
 

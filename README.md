@@ -6,8 +6,8 @@
 $bash> sudo apt install python3-pip
 $bash> pip3 install setuptools
 
-# Virtual environment creation
-$bash> python -m venv .theticketpost
+# Virtual environment creation (Python >= 3.10)
+$bash> python3 -m venv .theticketpost
 $bash> source .theticketpost/bin/activate
 $bash> pip install --upgrade pip
 
@@ -28,8 +28,19 @@ Open a browser and navigates to `localhost:8080`
 
 > After each repository update, clean config files hosted on local (~/.theticketpost) to avoid unwanted behaviours because of not compatible config files :)
 
+## Docker
+
+```bash
+$bash> docker build -f docker/Dockerfile -t theticketpost-service .
+$bash> docker run -d -p 8080:8080 -v theticketpost-data:/data theticketpost-service
+```
+
+See [docker/README.md](docker/README.md) for compose, Bluetooth printing and local apps.
+
 ## Applications
 **theticketpost-service** will load automatically all the applications located in the folder `~/.theticketpost/apps`. So place there the applications you desire to load from the [apps repository](https://github.com/theticketpost/theticketpost-apps) or create a symbolic link named `apps` in `~/.theticketpost` pointing to the **apps repository folder** to load all the applications hosted in the repo.
+
+Apps can be installed, updated and uninstalled from the store without restarting the service. A restart is only needed when an update changes the version of a library that is already in use; the store page then shows a "Restart now" button.
 
 ## Mockup
 
@@ -48,4 +59,4 @@ $bash> git clone https://github.com/theticketpost/theticketpost-service.git
 $bash> cd theticketpost-service
 $bash> python3 setup.py install --record files.txt
 ```
-For fix `OSError: [Errno 8] Exec format error: '/home/pi/.local/share/pyppeteer/local-chromium/575458/chrome-linux/chrome'` -> [pyppetter issue 250](https://github.com/miyakogi/pyppeteer/issues/250)
+The ticket is rendered with the system Chromium (`chromium`, `chromium-browser` or `google-chrome` found in the PATH). To use another browser set `"renderer": {"chromium_path": "/path/to/chromium"}` in `~/.theticketpost/config.json`.

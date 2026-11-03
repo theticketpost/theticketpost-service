@@ -1,143 +1,150 @@
 {% extends 'base.html' %}
 
 {% set active_page = 'settings' %}
+{% set narrow = true %}
 
 {% block content %}
-<div id="settings-app">
-    <div class="p-5 text-center">
-        <h1>Settings</h1>
-    </div>
-    <div class="container px-4">
-        <div v-if="config_warning" class="alert alert-warning mb-5" role="alert">
-            Please, configure and save settings before continue.
+<div id="settings-app" class="stack" v-cloak>
+
+    <header class="page-head">
+        <div>
+            <h1 class="page-title">Settings</h1>
         </div>
-        <form>
-            <h4 class="mb-3">Printer</h4>
-            <div class="row mb-3">
-                <div class="col-sm-10">
-                    <div class="form-group">
-                        <label for="device_list">Device</label>
-                        <select class="form-select" id="device_list" v-model="config.printer.device" :disabled='devices.length == 0 || scan_disabled'>
-                            <option v-for="device in devices" :value="device">
-                              { device.name } - { device.address }
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-2 d-flex">
-                    <button class="btn btn-primary w-100 align-self-end" type="button" @click="scan_for_devices()" :disabled='scan_disabled'>
-                        <span v-if="scan_disabled" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        { scan_disabled ? ' Scanning... ': 'Scan' }
-                    </button>
-                </div>
+    </header>
+
+    <div v-if="config_warning" class="banner banner-warn" role="status">
+        <svg class="i" aria-hidden="true"><use href="#i-warn"/></svg>
+        <span>Welcome! Choose your printer and save the settings to start.</span>
+    </div>
+
+    <!-- Printer -->
+    <section class="panel" aria-labelledby="printer-title">
+        <div class="panel-head">
+            <div>
+                <h2 id="printer-title" class="panel-title">Printer</h2>
+                <span class="panel-sub">Bluetooth thermal printer</span>
             </div>
-            <hr class="my-4">
-            <h4 class="mb-3">Scheduler</h4>
-            <div class="row mb-3">
-                <div class="col-sm-6">
+            <button type="button" class="btn btn-ghost" @click="scan_for_devices()" :disabled="scanning">
+                <span v-if="scanning" class="spinner" aria-hidden="true"></span>
+                <svg v-else class="i" aria-hidden="true"><use href="#i-bluetooth"/></svg>
+                { scanning ? 'Scanning…' : 'Scan for printers' }
+            </button>
+        </div>
 
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-monday" v-model="config.schedule.monday.active" >
-                                <label class="form-check-label" for="schedule-monday">Monday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='monday_active' v-model="config.schedule.monday.time" >
-                        </div>
-                    </div>
+        <div v-if="devices.length" class="devices" role="radiogroup" aria-label="Printers">
+            <label v-for="device in devices" :key="device.address" class="device" :class="{ selected: is_selected(device) }">
+                <input type="radio" name="printer" class="check" :checked="is_selected(device)" @change="config.printer.device = device">
+                <span class="device-text">
+                    <span style="font-weight: 600">{ device.name || 'Unknown printer' }</span>
+                    <span class="device-address">{ device.address }</span>
+                </span>
+                <span v-if="is_saved(device)" class="pill pill-ok">In use</span>
+            </label>
+        </div>
+        <p v-else class="panel-sub">No printer selected. Turn the printer on and scan.</p>
+    </section>
 
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-tuesday" v-model="config.schedule.tuesday.active" >
-                                <label class="form-check-label" for="schedule-tuesday">Tuesday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='tuesday_active' v-model="config.schedule.tuesday.time" >
-                        </div>
-                    </div>
-
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-wednesday" v-model="config.schedule.wednesday.active" >
-                                <label class="form-check-label" for="schedule-wednesday">Wednesday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='wednesday_active' v-model="config.schedule.wednesday.time" >
-                        </div>
-                    </div>
-
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-thursday" v-model="config.schedule.thursday.active" >
-                                <label class="form-check-label" for="schedule-thursday">Thursday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='thursday_active' v-model="config.schedule.thursday.time" >
-                        </div>
-                    </div>
-
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-friday" v-model="config.schedule.friday.active" >
-                                <label class="form-check-label" for="schedule-friday">Friday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='friday_active' v-model="config.schedule.friday.time" >
-                        </div>
-                    </div>
-
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-saturday" v-model="config.schedule.saturday.active">
-                                <label class="form-check-label" for="schedule-saturday">Saturday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='saturday_active' v-model="config.schedule.saturday.time" >
-                        </div>
-                    </div>
-
-                    <div class="row mb-1">
-                        <div class="col-sm-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="schedule-sunday" v-model="config.schedule.sunday.active">
-                                <label class="form-check-label" for="schedule-sunday">Sunday</label>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <input type="time" :disabled='sunday_active' v-model="config.schedule.sunday.time" >
-                        </div>
-                    </div>
-
-                </div>
-                <div class="col-sm-6">
-                </div>
+    <!-- Schedule -->
+    <section class="panel" aria-labelledby="schedule-title">
+        <div class="panel-head">
+            <div>
+                <h2 id="schedule-title" class="panel-title">Print schedule</h2>
+                <span class="panel-sub">The newspaper prints by itself on the days you choose.</span>
             </div>
-
-            <hr class="my-4">
-            <h4 class="mb-3">Webserver</h4>
-            <div class="row mb-3">
-                <div class="col-sm-6">
-                    <label for="port" class="form-label">Port</label>
-                    <input type="number" class="form-control" id="port" placeholder=""
-                            v-model="config.webserver.port" >
-                </div>
+        </div>
+        <div class="days">
+            <div v-for="day in days" :key="day.key" class="day" :class="{ on: config.schedule[day.key].active }">
+                <button type="button" class="day-toggle" :aria-pressed="config.schedule[day.key].active" @click="config.schedule[day.key].active = !config.schedule[day.key].active">{ day.short }</button>
+                <input type="time" class="field" v-model="config.schedule[day.key].time" :aria-label="day.name + ' print time'">
             </div>
+        </div>
+        <p class="panel-sub" style="color: var(--ink-2)">Next print: <strong>{ next_print || 'not scheduled' }</strong></p>
+    </section>
 
-            <hr class="my-4">
-            <button type="button" class="w-100 btn btn-primary btn-lg mb-3" @click="save_settings()">Save settings</button>
-        </form>
+    <!-- AI providers -->
+    <section class="panel" aria-labelledby="ai-title">
+        <div>
+            <h2 id="ai-title" class="panel-title">AI providers</h2>
+            <span class="panel-sub">Apps that write text use one of these. Add the keys you have, then pick the provider in each app's settings.</span>
+        </div>
+        <div class="providers">
+            <div v-for="provider in providers" :key="provider.id" class="provider">
+                <div class="provider-head">
+                    <span style="font-weight: 600">{ provider.name }</span>
+                    <span v-if="provider_ready(provider)" class="pill pill-ok">Ready</span>
+                    <a v-if="provider.keys_url" class="provider-link" :href="provider.keys_url" target="_blank" rel="noopener">Get a key</a>
+                </div>
+                <input v-if="provider.needs_key" type="password" class="field mono" v-model.trim="config.llm[provider.id].api_key"
+                    :aria-label="provider.name + ' API key'" placeholder="API key" autocomplete="off">
+                <template v-else>
+                    <label class="check-row">Use it (it runs on your machine, no key)
+                        <input type="checkbox" class="check" v-model="config.llm[provider.id].enabled">
+                    </label>
+                    <input type="text" class="field mono" v-model.trim="config.llm[provider.id].base_url"
+                        :placeholder="provider.default_base_url" :aria-label="provider.name + ' address'">
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <!-- App store -->
+    <section class="panel" aria-labelledby="repo-title">
+        <h2 id="repo-title" class="panel-title">App store source</h2>
+        <label class="label">GitHub repository
+            <input type="text" class="field mono" v-model="config.repository.name" placeholder="owner/repository">
+        </label>
+    </section>
+
+    <!-- Backup -->
+    <section class="panel" aria-labelledby="backup-title">
+        <div>
+            <h2 id="backup-title" class="panel-title">Backup</h2>
+            <span class="panel-sub">Save your configuration to a file, or bring it back here or on another machine.</span>
+        </div>
+        <label class="check-row">Settings: printer, schedule, AI providers and app store
+            <input type="checkbox" class="check" v-model="backup_parts.settings">
+        </label>
+        <label class="check-row">Newspaper: sections, each app's settings and uploaded images
+            <input type="checkbox" class="check" v-model="backup_parts.newspaper">
+        </label>
+        <p class="panel-sub">The file includes your API keys and calendar addresses: keep it private.</p>
+        <div class="actions">
+            <a class="btn btn-dark" :class="{ disabled: !export_url }" :href="export_url || null" :aria-disabled="!export_url">Export</a>
+            <label class="btn btn-ghost" :class="{ disabled: importing }">
+                <span v-if="importing" class="spinner" aria-hidden="true"></span>
+                { importing ? 'Importing…' : 'Import a backup' }
+                <input type="file" accept=".zip,application/zip" class="sr-only" @change="import_backup" :disabled="importing">
+            </label>
+        </div>
+        <p class="panel-sub">Importing replaces what the file contains. Apps it needs that aren't installed are installed from the store.</p>
+    </section>
+
+    <!-- Advanced -->
+    <section class="panel" aria-labelledby="adv-title">
+        <h2 id="adv-title" class="panel-title">Advanced</h2>
+        <div class="form-grid">
+            <label class="label">Web server port
+                <input type="number" class="field" v-model.number="config.webserver.port">
+            </label>
+            <label class="label">Browser used to render the ticket
+                <input type="text" class="field mono" v-model="config.renderer.chromium_path" placeholder="Detected automatically">
+            </label>
+        </div>
+        <div class="panel-head" style="padding-top: 16px; border-top: 1px solid var(--line-2)">
+            <span class="panel-sub">A new port is used after restarting the service.</span>
+            <button type="button" class="btn btn-danger" @click="restart()" :disabled="restarting">
+                <span v-if="restarting" class="spinner" aria-hidden="true"></span>
+                { restarting ? 'Restarting…' : 'Restart service' }
+            </button>
+        </div>
+    </section>
+
+    <div class="save-bar">
+        <span v-if="dirty" class="panel-sub">Unsaved changes</span>
+        <button type="button" class="btn btn-primary btn-lg" @click="save_settings()" :disabled="saving">
+            <span v-if="saving" class="spinner" aria-hidden="true"></span>
+            Save settings
+        </button>
     </div>
 </div>
 <script type="text/javascript" src="{{ url_for('static', filename='js/settings.js') }}"></script>

@@ -1,0 +1,41 @@
+# Run from the repository root:
+#   docker compose -f docker/docker-compose.yml up -d --build
+services:
+  theticketpost:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: theticketpost-service
+    container_name: theticketpost
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Europe/Madrid   # the scheduler prints at local times
+      # where the optional ollama service below answers (Settings > AI providers)
+      - OLLAMA_URL=http://ollama:11434/v1
+    volumes:
+      #- theticketpost-data:/data
+      # Development: load the apps from a local checkout of theticketpost-apps.
+      # Careful: uninstalling an app from the UI deletes its folder.
+      #- ../../theticketpost-apps:/data/apps
+      # Bluetooth printing (see docker/README.md): host's BlueZ through D-Bus
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
+
+    # Bluetooth printing: Docker's default AppArmor profile blocks D-Bus
+    security_opt:
+       - apparmor=unconfined
+
+  # Optional: AI models running on this machine, no API key (see docker/README.md).
+  # Only starts with --profile ollama. Models live in the ollama-models volume.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    profiles: ["ollama"]
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+
+volumes:
+  theticketpost-data:
+  ollama-models:

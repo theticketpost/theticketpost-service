@@ -1,62 +1,43 @@
-<div v-if="loaded && device" id="newspaper" :style="{width: ticket_px_width + 'px'}">
-
-    <vuedraggable v-model="apps" item-key="id" class="list-group" @end="save_json()">
+<div v-if="loaded" id="newspaper" :style="{width: ticket_px_width + 'px'}">
+    <vuedraggable v-model="apps" item-key="id" class="ticket-list" :class="{ 'is-empty': editable && apps.length == 0 }" handle=".handle"
+        :group="{ name: 'sections', pull: false }" :force-fallback="true" :disabled="!editable" :move="allow_move"
+        @start="drag_start" @end="on_reorder" @change="on_change">
         <template #item="{ element, index }">
-            <div class="card list-group-item">
-                <div class="component card-body row justify-content-between">
-                    <span class="render-component">
-                        <span v-html="element.rawhtml" v-bind:data-component-id="element.id" data-bs-toggle="modal" data-bs-target="#theModal"></span>
-                        <button type="submit" class="btn-close" @click="del(index)"></button>
-                    </span>
+            <div class="ticket-item" :class="{ selected: editable && selected === index, 'is-group': is_group(element), 'merge-target': editable && merge_target === element,
+                    'not-printed': !editable && skip_reason(index), 'will-skip': editable && skip_reason(index) }"
+                :data-id="element.id" @click="select(index)">
+                <div v-if="editable && merge_target === element" class="merge-hint" aria-hidden="true">
+                    <svg class="i"><use href="#i-dice"/></svg>
+                    { is_group(element) ? 'Drop to add it to this random section' : 'Drop to join them in a random section' }
+                </div>
+                <div v-if="editable && selected === index" class="item-tools" @click.stop>
+                    <button type="button" class="handle" aria-label="Drag to reorder" title="Drag to reorder"><svg class="i" aria-hidden="true"><use href="#i-drag"/></svg></button>
+                    <button type="button" aria-label="Refresh section" title="Refresh" @click="refresh(element)"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg></button>
+                    <button v-if="!is_group(element)" type="button" aria-label="Turn into a random section" title="Random section: a different app each day" @click="make_group(index)"><svg class="i" aria-hidden="true"><use href="#i-dice"/></svg></button>
+                    <button type="button" aria-label="Remove section" title="Remove" @click="del(index)"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                </div>
+                <!-- editor only: a random section shows one alternative at a time -->
+                <div v-if="editable && is_group(element)" class="group-bar" @click.stop="select(index)">
+                    <svg class="i" aria-hidden="true"><use href="#i-dice"/></svg>
+                    <span class="group-label" :title="element.mode === 'random' ? 'A random one prints each day' : 'A different one prints each day, in turn'">{ element.mode === 'random' ? 'Random' : 'Daily' }</span>
+                    <span class="group-count"><span class="group-app">{ current(element).appname }</span> · { element.shown + 1 } of { element.items.length }</span>
+                    <button type="button" aria-label="Previous alternative" @click.stop="step(index, -1)"><svg class="i" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+                    <button type="button" aria-label="Next alternative" @click.stop="step(index, 1)"><svg class="i" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+                </div>
+                <!-- editor only: sections left out of today's print, and ties to a neighbour -->
+                <div v-if="editable && (skip_reason(index) || element.link)" class="print-note">
+                    <svg class="i" aria-hidden="true"><use :href="element.link ? '#i-link' : '#i-eye-off'"/></svg>
+                    <span v-if="skip_reason(index) === 'empty'">Not printed today: nothing to show</span>
+                    <span v-else-if="skip_reason(index) === 'linked'">Not printed today: goes with the section { element.link === 'next' ? 'below' : 'above' }</span>
+                    <span v-else>Prints only with the section { element.link === 'next' ? 'below' : 'above' }</span>
+                </div>
+                <!-- the box apps lay out against (e.g. sudoku's absolute grid) -->
+                <div class="ticket-body">
+                    <div v-if="editable && !current(element).rawhtml" class="ticket-loading"><span class="spinner" aria-hidden="true"></span>Adding { current(element).appname }…</div>
+                    <div v-html="current(element).rawhtml"></div>
                 </div>
             </div>
         </template>
     </vuedraggable>
-
-</div>
-
-
-<div class="modal fade" id="theModal" tabindex="-1" aria-labelledby="theModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="component-configuration-title" class="modal-title text-capitalize">Setup</h5>
-            </div>
-            <div class="modal-body">
-                <form id="component-configuration-form">
-                    <div v-for="input in template">
-                        <div v-if="input.type == 'checkbox'" class="my-4 form-check">
-                            <input type="checkbox" class="form-check-input input-checkbox" :id="input.name" v-model="input.value">
-                            <label class="form-check-label" :for="input.name">{input.label}</label>
-                        </div>
-                        <div v-else-if="input.type == 'number'" class="my-4">
-                            <label :for="input.name" class="form-label">{input.label}</label>
-                            <input type="number" class="form-control input-number" :id="input.name" v-model="input.value" >
-                        </div>
-                        <div v-else-if="input.type == 'text'" class="my-4">
-                            <label :for="input.name" class="form-label">{input.label}</label>
-                            <input type="text" class="form-control input-text" :id="input.name" v-model="input.value" >
-                        </div>
-                        <div v-else-if="input.type == 'image'" class="my-4">
-                            <label :for="input.name" class="form-label">{input.label}</label>
-                            <input type="file" class="form-control input-file" :id="input.name" accept="image/*" @change="preview_img">
-                            <img class="image_preview" :src="input.url" />
-                        </div>
-                        <div v-else-if="input.type == 'select'" class="my-4">
-                            <label :for="input.name" class="form-label">{input.label}</label>
-                            <select class="form-select" class="form-control" v-model="input.value">
-                                <option v-for="option in input.options" :value="option.value" :selected="input.value == option.value">
-                                  { option.description }
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal-button">Close</button>
-                <button type="button" class="btn btn-primary" @click="save_component_options">Save changes</button>
-            </div>
-        </div>
-    </div>
+    <div v-if="editable && apps.length == 0" class="ticket-empty">Drag a section here to start your newspaper.</div>
 </div>

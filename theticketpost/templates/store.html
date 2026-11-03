@@ -3,7 +3,64 @@
 {% set active_page = 'store' %}
 
 {% block content %}
-<div class="p-5 text-center">
-    <h1>AppStore</h1>
+<div id="appstore-app" class="stack" v-cloak>
+
+    <header class="page-head">
+        <div>
+            <span class="eyebrow">Apps for your newspaper</span>
+            <h1 class="page-title">App store</h1>
+        </div>
+    </header>
+
+    <div v-if="restart_required" class="banner banner-dark" role="status">
+        <svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>
+        <span>An update changed a library that is already in use. Restart the service to finish.</span>
+        <button type="button" class="btn btn-light" :disabled="restarting" @click="restart()">
+            <span v-if="restarting" class="spinner" aria-hidden="true"></span>
+            { restarting ? 'Restarting…' : 'Restart now' }
+        </button>
+    </div>
+
+    <div class="actions" role="group" aria-label="Filter">
+        <button type="button" class="chip" :aria-pressed="filter == 'all'" @click="filter = 'all'">All · { apps.length }</button>
+        <button type="button" class="chip" :aria-pressed="filter == 'updates'" @click="filter = 'updates'">Updates · { count_updates }</button>
+        <button type="button" class="chip" :aria-pressed="filter == 'new'" @click="filter = 'new'">Not installed · { apps.length - count_updates }</button>
+    </div>
+
+    <div v-if="visible.length" class="cards">
+        <article v-for="app in visible" :key="app.desc.name" class="card">
+            <div class="card-top">
+                <div class="icon-box lg">
+                    <svg class="app-icon" aria-hidden="true" style="width: 24px; height: 24px"><use :href="'/api/appstore/icon/' + app.desc.name + '#layer1'"/></svg>
+                </div>
+                <span v-if="app.update" class="pill pill-info">Update</span>
+            </div>
+            <div>
+                <h2 class="card-title">{ app.desc.name }</h2>
+                <span class="app-meta">
+                    <template v-if="app.update">v{ app.installed_version } → </template>v{ app.desc.version }<template v-if="app.desc.author"> · { app.desc.author }</template>
+                </span>
+            </div>
+            <p class="card-desc">{ app.desc.description }</p>
+            <button type="button" class="btn" :class="app.update ? 'btn-primary' : 'btn-outline'" :disabled="installing != ''" @click="install(app.desc.name)">
+                <span v-if="installing == app.desc.name" class="spinner" aria-hidden="true"></span>
+                { installing == app.desc.name ? 'Installing…' : (app.update ? 'Update' : 'Install') }
+            </button>
+        </article>
+    </div>
+
+    <div v-else-if="loaded" class="panel empty">
+        <template v-if="filter == 'updates'"><p>All your apps are up to date.</p></template>
+        <template v-else-if="apps.length == 0">
+            <p>No apps to show. The store may still be loading, or the apps repository in Settings is not reachable.</p>
+            <div class="actions">
+                <button type="button" class="btn btn-ghost" @click="get_appstore_apps()">Try again</button>
+                <a class="btn btn-ghost" href="{{ url_for('settings') }}">Check settings</a>
+            </div>
+        </template>
+        <template v-else><p>You have every app installed.</p></template>
+    </div>
 </div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/appstore.js') }}"></script>
 {% endblock %}

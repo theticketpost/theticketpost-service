@@ -7,9 +7,14 @@ import requests
 import json
 from packaging import version
 import threading
+import time
 import urllib.parse
 
 RAW_URL = "https://raw.githubusercontent.com/{repo}/{ref}/{path}"
+# The catalog is read again in the background every few hours, so new apps and
+# updates show up without restarting. Each read is one GitHub API call
+# (unauthenticated calls are limited to 60/hour).
+AUTO_REFRESH_SECONDS = 3 * 3600
 
 # Every app published in the repository: {name: {'desc': desc, 'path': path in the repo}}
 catalog = {}
@@ -17,6 +22,14 @@ apps_folder = ""
 repository_name = ""
 branch = ""
 repo_files = []
+
+# Catalog refresh state: one read at a time
+refresh_lock = threading.Lock()
+loading = False
+checked_at = 0.0     # time.time() of the last read, failed or not
+loaded_at = 0.0      # time.time() of the last successful read
+last_error = ""
+auto_refresh_started = False
 
 
 def compare_version_number(a, b):
@@ -111,32 +124,86 @@ def load_catalog():
     to 60/hour); files are downloaded from raw.githubusercontent.com."""
     global repo_files, branch, catalog
 
-    repo = Github(retry=None, timeout=15).get_repo(repository_name)
-    branch = repo.default_branch
-    tree = repo.get_git_tree(branch, recursive=True)
-    repo_files = [element.path for element in tree.tree if element.type == "blob"]
+    repository = repository_name
+    repo = Github(retry=None, timeout=15).get_repo(repository)
+    default_branch = repo.default_branch
+    tree = repo.get_git_tree(default_branch, recursive=True)
+    files = [element.path for element in tree.tree if element.type == "blob"]
 
     apps = {}
-    for file_path in repo_files:
+    for file_path in files:
         folder, _, filename = file_path.partition("/")
         if filename == "desc.json" and not folder.startswith("{{"):
             try:
-                desc = json.loads(repo_get_file(file_path))
+                url = RAW_URL.format(repo=repository, ref=default_branch, path=urllib.parse.quote(file_path))
+                response = requests.get(url, timeout=30)
+                response.raise_for_status()
+                desc = json.loads(response.content)
                 apps[desc['name']] = {'desc': desc, 'path': folder}
             except (ValueError, KeyError, requests.RequestException) as e:
                 logger.error(f"Invalid app description in {file_path}: {e}")
-    catalog = apps
+
+    if repository != repository_name:
+        # the repository was changed in Settings while this one was being read
+        return False
+    branch, repo_files, catalog = default_branch, files, apps
     icons.clear()
-    logger.info(f"App store loaded {len(catalog)} applications from {repository_name}")
+    logger.info(f"App store loaded {len(catalog)} applications from {repository}")
+    return True
 
 
 
 def load_catalog_safe():
-    # A store failure (no network, GitHub rate limit...) must not affect the service
+    # A store failure (no network, GitHub rate limit...) must not affect the service;
+    # the previous catalog stays
+    global loading, checked_at, loaded_at, last_error
     try:
-        load_catalog()
+        # False: the repository changed in Settings during the read, read the new one
+        while not load_catalog():
+            pass
+        loaded_at = time.time()
+        last_error = ""
     except Exception as e:
+        last_error = str(e)
         logger.error(f"Could not load the app store from {repository_name}: {e}")
+    finally:
+        checked_at = time.time()
+        loading = False
+
+
+
+def refresh(max_age=0):
+    """Reads the catalog again in the background, unless the last read is less
+    than max_age seconds old. Returns True when a read is going on."""
+    global loading
+    if not repository_name:
+        return False
+    with refresh_lock:
+        if loading:
+            return True
+        if max_age and time.time() - checked_at < max_age:
+            return False
+        loading = True
+    threading.Thread(target=load_catalog_safe, name="appstore", daemon=True).start()
+    return True
+
+
+
+def status():
+    return {
+        "loading": loading,
+        "checked_at": checked_at or None,
+        "loaded_at": loaded_at or None,
+        "error": last_error,
+    }
+
+
+
+def auto_refresh():
+    while True:
+        time.sleep(AUTO_REFRESH_SECONDS)
+        # a refresh from the store page in the meantime counts
+        refresh(max_age=AUTO_REFRESH_SECONDS - 60)
 
 
 
@@ -144,8 +211,12 @@ def init(flaskApp):
     global apps_folder
     global repository_name
     global catalog
+    global checked_at, loaded_at, last_error
+    global auto_refresh_started
 
     catalog = {}
+    checked_at = loaded_at = 0.0
+    last_error = ""
 
     # Folder where applications will be installed
     apps_folder = os.path.join(theticketpost.settings.get_storage_path(), "apps")
@@ -158,4 +229,7 @@ def init(flaskApp):
         logger.warning("No apps repository configured, the app store will be empty")
         return
 
-    threading.Thread(target=load_catalog_safe, name="appstore", daemon=True).start()
+    refresh()
+    if not auto_refresh_started:
+        auto_refresh_started = True
+        threading.Thread(target=auto_refresh, name="appstore-refresh", daemon=True).start()

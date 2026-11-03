@@ -21,6 +21,18 @@ const TTP = {
         });
     },
 
+    // Number of store updates on the sidebar badge
+    async showUpdateCount() {
+        try {
+            const apps = await TTP.getJSON("/api/appstore/apps");
+            const updates = apps.filter((app) => app.update).length;
+            document.querySelectorAll("[data-update-count]").forEach((element) => {
+                element.textContent = updates;
+                element.hidden = updates === 0;
+            });
+        } catch (error) {}
+    },
+
     // Next scheduled print as "Tue 08:00", or null
     nextPrint(schedule, now = new Date()) {
         if (!schedule) return null;
@@ -50,12 +62,5 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     } catch (error) {}
 
-    try {
-        const apps = await TTP.getJSON("/api/appstore/apps");
-        const updates = apps.filter((app) => app.update).length;
-        document.querySelectorAll("[data-update-count]").forEach((element) => {
-            element.textContent = updates;
-            element.hidden = updates === 0;
-        });
-    } catch (error) {}
+    TTP.showUpdateCount();
 });

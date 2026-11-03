@@ -10,6 +10,14 @@
             <span class="eyebrow">Apps for your newspaper</span>
             <h1 class="page-title">App store</h1>
         </div>
+        <div class="actions">
+            <span v-if="checked_label" class="app-meta">{ checked_label }</span>
+            <button type="button" class="btn btn-ghost" :disabled="checking" @click="check_for_updates()">
+                <span v-if="checking" class="spinner" aria-hidden="true"></span>
+                <svg v-else class="i" aria-hidden="true"><use href="#i-refresh"/></svg>
+                { checking ? 'Checking…' : 'Check for updates' }
+            </button>
+        </div>
     </header>
 
     <div v-if="restart_required" class="banner banner-dark" role="status">
@@ -54,7 +62,7 @@
         <template v-else-if="apps.length == 0">
             <p>No apps to show. The store may still be loading, or the apps repository in Settings is not reachable.</p>
             <div class="actions">
-                <button type="button" class="btn btn-ghost" @click="get_appstore_apps()">Try again</button>
+                <button type="button" class="btn btn-ghost" :disabled="checking" @click="check_for_updates()">Try again</button>
                 <a class="btn btn-ghost" href="{{ url_for('settings') }}">Check settings</a>
             </div>
         </template>

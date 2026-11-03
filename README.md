@@ -40,7 +40,7 @@ See [docker/README.md](docker/README.md) for compose, Bluetooth printing and loc
 ## Applications
 **theticketpost-service** will load automatically all the applications located in the folder `~/.theticketpost/apps`. So place there the applications you desire to load from the [apps repository](https://github.com/theticketpost/theticketpost-apps) or create a symbolic link named `apps` in `~/.theticketpost` pointing to the **apps repository folder** to load all the applications hosted in the repo.
 
-Apps can be installed, updated and uninstalled from the store without restarting the service. A restart is only needed when an update changes the version of a library that is already in use; the store page then shows a "Restart now" button.
+Apps can be installed, updated and uninstalled from the store without restarting the service. New apps and updates show up on their own (the store checks the apps repository every few hours and when you open it), or right away with its "Check for updates" button. A restart is only needed when an update changes the version of a library that is already in use; the store page then shows a "Restart now" button.
 
 ## Mockup
 

@@ -230,6 +230,20 @@ def store_apps():
     return jsonify( [obj for obj in theticketpost.appstore.list().values()] )
 
 
+@app.route('/api/appstore/refresh', methods=['POST'])
+def store_refresh():
+    """Reads the store catalog again in the background (only when older than
+    ?max_age seconds, if given). Poll /api/appstore/status to know when it's done."""
+    max_age = request.args.get('max_age', default=0, type=int)
+    theticketpost.appstore.refresh(max_age=max_age)
+    return jsonify(theticketpost.appstore.status())
+
+
+@app.route('/api/appstore/status')
+def store_status():
+    return jsonify(theticketpost.appstore.status())
+
+
 @app.route('/api/appstore/icon/<string:app_name>')
 def store_app_icon(app_name):
     try:

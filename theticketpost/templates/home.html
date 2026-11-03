@@ -111,18 +111,29 @@
 
             <section v-if="selected_element" class="panel" aria-labelledby="print-title">
                 <h2 id="print-title" class="panel-title">When to print it</h2>
-                <select class="field" aria-labelledby="print-title" :value="selected_element.link || ''" @change="set_link($event.target.value)">
-                    <option value="">Always, when it has something to show</option>
-                    <option value="next">Only if the section below is printed</option>
-                    <option value="prev">Only if the section above is printed</option>
-                </select>
-                <p class="panel-sub">For a title: tie it to its section, so both are left out when that has nothing to show, like a calendar with no events.</p>
+                <div class="label">
+                    <span id="days-title">Days</span>
+                    <div class="day-picker" role="group" aria-labelledby="days-title">
+                        <button v-for="(name, day) in day_names" :key="day" type="button" class="day" :class="{ today: day === weekday }"
+                            :aria-pressed="prints_on(selected_element, day)" @click="toggle_day(day)">{ name }</button>
+                    </div>
+                    <span class="panel-sub">{ has_days(selected_element) ? 'Prints only on ' + days_label(selected_element) + '.' : 'Prints every day. Untick the days to leave it out.' }</span>
+                </div>
+                <label class="label">Together with
+                    <select class="field" :value="selected_element.link || ''" @change="set_link($event.target.value)">
+                        <option value="">Always, when it has something to show</option>
+                        <option value="next">Only if the section below is printed</option>
+                        <option value="prev">Only if the section above is printed</option>
+                    </select>
+                </label>
+                <p class="panel-sub">For a title: tie it to its section, so both are left out when that isn't printed, like a calendar with no events or the film listing on a Monday.</p>
             </section>
 
             <section aria-labelledby="add-title" style="display: flex; flex-direction: column; gap: 12px">
                 <h2 id="add-title" class="section-title">Add a section</h2>
                 <p class="panel-sub">Drag a section onto the ticket, or click it to add it after the selected one (or, with a random section selected, as one more alternative).</p>
-                <vuedraggable :list="renderable_apps" item-key="name" class="tiles" :group="{ name: 'sections', pull: 'clone', put: false }" :sort="false" :clone="new_section" :force-fallback="true">
+                <vuedraggable :list="renderable_apps" item-key="name" class="tiles" :group="tiles_group" :sort="false" :clone="new_section" :force-fallback="true"
+                    @start="dragging = true" @end="dragging = false">
                     <template #item="{ element: app }">
                         <button type="button" class="tile" @click="add(app.name)">
                             <svg v-if="app.icon_url" class="app-icon" viewBox="0 0 16 16" aria-hidden="true"><use :href="app.icon_url + '#layer1'"/></svg>

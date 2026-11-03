@@ -6,6 +6,10 @@ const root = document.getElementById('newspaper-app');
 // what current() returns for a random section with no alternatives
 const EMPTY_SECTION = Object.freeze({ appname: "", rawhtml: "", config: [] });
 
+// a section's "days": the weekdays it prints on, 0 Monday to 6 Sunday (none: every day)
+const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAY_PLURALS = ["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"];
+
 const NewspaperApp = {
     components: {
         vuedraggable,
@@ -24,6 +28,12 @@ const NewspaperApp = {
             scale: 1,
             dragged: null,
             merge_target: null,
+            // while dragging, tall sections shrink so they're easy to move around
+            dragging: false,
+            day_names: DAY_NAMES,
+            // the same objects on every render (see ticket.html)
+            ticket_group: { name: 'sections', pull: false },
+            tiles_group: { name: 'sections', pull: 'clone', put: false },
         }
     },
     mounted() {
@@ -68,14 +78,18 @@ const NewspaperApp = {
         next_print: function() {
             return TTP.nextPrint(this.config.schedule);
         },
+        weekday: function() {
+            return (new Date().getDay() + 6) % 7;
+        },
         today: function() {
             return new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
         },
         renderable_apps: function() {
             return this.installed_apps.filter((app) => app.render_component);
         },
-        // why each top level section won't be printed today: "empty" (its app has
-        // nothing to show), "linked" (it goes with a neighbour that isn't printed) or null
+        // why each top level section won't be printed today: "day" (not one of its
+        // days), "empty" (its app has nothing to show), "linked" (it goes with a
+        // neighbour that isn't printed) or null
         skip_reasons: function() {
             const reasons = new Array(this.apps.length).fill(undefined);
             const resolve = (index, visiting) => {
@@ -84,7 +98,9 @@ const NewspaperApp = {
                 visiting.add(index);
                 const element = this.apps[index];
                 let reason = null;
-                if (this.is_empty(element)) {
+                if (!this.prints_on(element, this.weekday)) {
+                    reason = "day";
+                } else if (this.is_empty(element)) {
                     reason = "empty";
                 } else if (element.link === "next" || element.link === "prev") {
                     const neighbour = index + (element.link === "next" ? 1 : -1);
@@ -222,6 +238,45 @@ const NewspaperApp = {
         skip_reason: function(index) {
             return this.skip_reasons[index] || null;
         },
+        has_days: function(element) {
+            return Array.isArray(element.days) && element.days.length > 0 && element.days.length < 7;
+        },
+        prints_on: function(element, day) {
+            return !this.has_days(element) || element.days.includes(day);
+        },
+        days_label: function(element) {
+            const days = element.days;
+            if (days.length == 1) return DAY_PLURALS[days[0]];
+            if (days.join() == "0,1,2,3,4") return "weekdays";
+            if (days.join() == "5,6") return "weekends";
+            return days.map((day) => DAY_NAMES[day]).join(", ");
+        },
+        toggle_day: function(day) {
+            const element = this.selected_element;
+            const days = new Set(this.has_days(element) ? element.days : [0, 1, 2, 3, 4, 5, 6]);
+            if (days.has(day)) days.delete(day);
+            else days.add(day);
+            // at least one day: a section that never prints is better removed
+            if (days.size == 0) return;
+            if (days.size == 7) delete element.days;
+            else element.days = [...days].sort();
+            this.save_json();
+        },
+        // the editor's line above a section: why it's left out today, or what it depends on
+        print_note: function(index) {
+            const element = this.apps[index];
+            const neighbour = element.link === "next" ? "below" : "above";
+            switch (this.skip_reason(index)) {
+                case "day": return { icon: "#i-calendar", text: "Not printed today: only on " + this.days_label(element) };
+                case "empty": return { icon: "#i-eye-off", text: "Not printed today: nothing to show" };
+                case "linked": return { icon: "#i-link", text: "Not printed today: goes with the section " + neighbour };
+            }
+            const parts = [];
+            if (this.has_days(element)) parts.push("only on " + this.days_label(element));
+            if (element.link) parts.push("only with the section " + neighbour);
+            if (!parts.length) return null;
+            return { icon: this.has_days(element) ? "#i-calendar" : "#i-link", text: "Prints " + parts.join(", ") };
+        },
         set_link: function(link) {
             if (link) this.selected_element.link = link;
             else delete this.selected_element.link;
@@ -296,9 +351,29 @@ const NewspaperApp = {
             // random section; near the edges it reorders as usual
             this.dragged = this.apps[event.oldIndex];
             this.merge_target = null;
+            this.shrink(event.item);
             this._track = (e) => this.track_merge(e.touches ? e.touches[0] : e);
             document.addEventListener('pointermove', this._track);
             document.addEventListener('touchmove', this._track, { passive: true });
+        },
+        // tall sections shrink while dragging; the page scrolls so that the
+        // section being dragged stays under the pointer
+        shrink: function(item) {
+            const before = item ? item.getBoundingClientRect().top : null;
+            this.dragging = true;
+            this.$nextTick(() => {
+                if (item) window.scrollBy(0, item.getBoundingClientRect().top - before);
+            });
+        },
+        // back to full size, keeping the section that was dropped where it was
+        unshrink: function(item) {
+            const before = item && item.isConnected ? item.getBoundingClientRect().top : null;
+            this.dragging = false;
+            // twice: a drop that joins a random section is applied on the next tick
+            this.$nextTick(() => this.$nextTick(() => {
+                const dropped = this.selected === null ? null : document.querySelectorAll('#newspaper .ticket-item')[this.selected];
+                if (dropped && before !== null) window.scrollBy(0, dropped.getBoundingClientRect().top - before);
+            }));
         },
         track_merge: function(point) {
             let target = null;
@@ -349,6 +424,7 @@ const NewspaperApp = {
         on_reorder: function(event) {
             document.removeEventListener('pointermove', this._track);
             document.removeEventListener('touchmove', this._track);
+            this.unshrink(event.item);
             // where it was dropped counts too (a quick drag may not have moved over it)
             const drop = event.originalEvent;
             if (this.dragged && drop) {

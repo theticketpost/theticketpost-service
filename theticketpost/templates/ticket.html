@@ -1,6 +1,10 @@
-<div v-if="loaded" id="newspaper" :style="{width: ticket_px_width + 'px'}">
-    <vuedraggable v-model="apps" item-key="id" class="ticket-list" :class="{ 'is-empty': editable && apps.length == 0 }" handle=".handle"
-        :group="{ name: 'sections', pull: false }" :force-fallback="true" :disabled="!editable" :move="allow_move"
+<!-- vuedraggable's attributes must keep the same value from one render to the next
+     (no object literals): when one changes, it resets the Sortable options, and
+     in the middle of a drag Sortable then stops sorting. Hence ticket_group, a
+     string for its class, and the dragging class on #newspaper. -->
+<div v-if="loaded" id="newspaper" :class="{ dragging: editable && dragging }" :style="{width: ticket_px_width + 'px'}">
+    <vuedraggable v-model="apps" item-key="id" class="ticket-list" :class="editable && apps.length == 0 ? 'is-empty' : ''" handle=".handle"
+        :group="ticket_group" :force-fallback="true" :disabled="!editable" :move="allow_move"
         @start="drag_start" @end="on_reorder" @change="on_change">
         <template #item="{ element, index }">
             <div class="ticket-item" :class="{ selected: editable && selected === index, 'is-group': is_group(element), 'merge-target': editable && merge_target === element,
@@ -24,12 +28,10 @@
                     <button type="button" aria-label="Previous alternative" @click.stop="step(index, -1)"><svg class="i" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
                     <button type="button" aria-label="Next alternative" @click.stop="step(index, 1)"><svg class="i" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
                 </div>
-                <!-- editor only: sections left out of today's print, and ties to a neighbour -->
-                <div v-if="editable && (skip_reason(index) || element.link)" class="print-note">
-                    <svg class="i" aria-hidden="true"><use :href="element.link ? '#i-link' : '#i-eye-off'"/></svg>
-                    <span v-if="skip_reason(index) === 'empty'">Not printed today: nothing to show</span>
-                    <span v-else-if="skip_reason(index) === 'linked'">Not printed today: goes with the section { element.link === 'next' ? 'below' : 'above' }</span>
-                    <span v-else>Prints only with the section { element.link === 'next' ? 'below' : 'above' }</span>
+                <!-- editor only: sections left out of today's print, their days and ties to a neighbour -->
+                <div v-if="editable && print_note(index)" class="print-note">
+                    <svg class="i" aria-hidden="true"><use :href="print_note(index).icon"/></svg>
+                    <span>{ print_note(index).text }</span>
                 </div>
                 <!-- the box apps lay out against (e.g. sudoku's absolute grid) -->
                 <div class="ticket-body">

@@ -172,7 +172,9 @@ def print_locked(address, port):
         density = printer.get("density", theticketpost.printer.cmd.DEFAULT_DENSITY)
         data = theticketpost.printer.cmd.cmds_print_img(dithered, density)
         try:
-            asyncio.run(theticketpost.printer.ble.send_data(address, data, pace=printer.get("pace", True)))
+            asyncio.run(theticketpost.printer.ble.send_data(
+                address, data, pace=printer.get("pace", True),
+                max_kbps=printer.get("max_kbps", theticketpost.printer.ble.DEFAULT_MAX_KBPS)))
         except Exception as e:
             return 500, str(e)
 

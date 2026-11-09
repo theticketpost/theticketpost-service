@@ -42,6 +42,12 @@ DONE_NOTIFICATION = bytearray(b'\x1a\x0f\x0c')
 DARK_DOTS_PER_SECOND = 384 * 60
 # don't sleep for less than this (asyncio.sleep overhead)
 MIN_SLEEP = 0.01
+# Top sending speed. The printer prints ~5 KB/s but takes data much faster
+# into its memory; at 25-29 KB/s, tickets over ~100 KB lost the 181 packets
+# it still had queued, while 6.7 KB/s printed fine. The first BURST bytes go
+# at full speed, so it has something to print right away.
+DEFAULT_MAX_KBPS = 6
+BURST = 16 * 1024
 
 
 def explain_error(e):
@@ -271,7 +277,7 @@ def black_dots(chunk):
     return sum(byte.bit_count() for byte in chunk)
 
 
-async def send_data(address, data, pace=True):
+async def send_data(address, data, pace=True, max_kbps=DEFAULT_MAX_KBPS):
 
     try:
         logger.info("Connecting to device with address==" + address + " ...")
@@ -297,12 +303,21 @@ async def send_data(address, data, pace=True):
             # bleak < 0.21 did by default: with response every 20 byte chunk
             # waits for a round trip and printing takes minutes.
             logger.info("Transmiting data to device with address==" + address)
-            started = asyncio.get_running_loop().time()
+            loop = asyncio.get_running_loop()
+            started = loop.time()
+            rate = max_kbps * 1024 if max_kbps and max_kbps > 0 else None
+            sent_bytes = 0
             owed = 0.0
             for chunk in chunkify(data, chunk_size):
+                if rate:
+                    # never more than BURST bytes ahead of max_kbps
+                    wait = started + (sent_bytes - BURST) / rate - loop.time()
+                    if wait >= MIN_SLEEP:
+                        await asyncio.sleep(wait)
                 await flow.wait_for_room()
                 await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk, response=False)
                 flow.sent += 1
+                sent_bytes += len(chunk)
                 if pace and not flow.active:
                     # no flow control: give the printer time to print the dark dots just sent
                     owed += black_dots(chunk) / DARK_DOTS_PER_SECOND

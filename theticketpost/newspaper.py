@@ -67,6 +67,9 @@ def chromium_path():
     return None
 
 
+RENDER_TIMEOUT_MS = 5 * 60 * 1000
+
+
 async def to_img_thread(path, port):
 
     # launch chromium browser in the background
@@ -94,9 +97,12 @@ async def screenshot_newspaper(browser, path, port):
     # open a new tab in the browser
     page = await browser.newPage()
     # add URL to a new page and then open it
-    await page.goto("http://localhost:" + str(port) + "/newspaper", {'waitUntil' : 'networkidle0'})
+    # networkidle0 waits for every section to render; AI apps (a coloring page
+    # drawn by an image model) can take minutes, well over the 30 s default
+    await page.goto("http://localhost:" + str(port) + "/newspaper",
+                    {'waitUntil': 'networkidle0', 'timeout': RENDER_TIMEOUT_MS})
 
-    await page.waitForSelector("#newspaper", { "visible": True })
+    await page.waitForSelector("#newspaper", {"visible": True, "timeout": RENDER_TIMEOUT_MS})
 
     dimensions = await page.evaluate('''() => {
 

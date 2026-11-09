@@ -15,6 +15,10 @@
                 <svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>
                 { next_print ? 'Next print · ' + next_print : 'No print scheduled' }
             </a>
+            <a v-if="device" class="btn btn-ghost" href="/api/printer/last.png" target="_blank" rel="noopener">
+                <svg class="i" aria-hidden="true"><use href="#i-take-out"/></svg>
+                Last print
+            </a>
             <button v-if="device" type="button" class="btn btn-primary" @click="print()" :disabled="printing">
                 <span v-if="printing" class="spinner" aria-hidden="true"></span>
                 <svg v-else class="i" aria-hidden="true"><use href="#i-print"/></svg>

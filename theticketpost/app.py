@@ -21,7 +21,7 @@ import threading
 
 app = Flask(__name__)
 
-version = '1.4.3'
+version = '1.4.4'
 ble_scan_timout = 10
 port = 8080
 
@@ -202,6 +202,17 @@ def print_newspaper(address):
     if code == 200:
         logger.info(msg)
     return Response(msg, status=code, mimetype='text/plain')
+
+
+@app.route('/api/printer/last.png')
+def last_print():
+    """The last printed ticket, dithered to 1 bit like the printer gets it."""
+    data = theticketpost.newspaper.last_print_png()
+    if data is None:
+        return Response("Nothing printed yet", status=404, mimetype='text/plain')
+    response = send_file(io.BytesIO(data), mimetype='image/png')
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @app.route('/api/llm/providers')

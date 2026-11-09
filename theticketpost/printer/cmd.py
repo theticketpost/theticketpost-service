@@ -40,8 +40,11 @@ def cmd_marker(lines, width):
     # 0x00              mode: 0 (normal), 1 (double width),
     #                   2 (double-height), 3 (quadruple)
     # 0x30 0x00         16bit, little-endian: number of bytes / line (48)
-    # 0xff 0x00         16bit, little-endian: number of lines in the image (255)
-    return b'\x1d\x76\x30\x00'+(int(width / 8)).to_bytes(2, 'little')+(lines - 1).to_bytes(2, 'little')
+    # 0x00 0x01         16bit, little-endian: number of lines in the image (256)
+    # Exactly the lines that follow: it used to say one less, and the printer
+    # read the last line of every 256 as commands. Depending on the drawing,
+    # those bytes fed paper or threw away what it hadn't printed yet.
+    return b'\x1d\x76\x30\x00'+(int(width / 8)).to_bytes(2, 'little')+lines.to_bytes(2, 'little')
 
 
 def cmd_line(image, line):

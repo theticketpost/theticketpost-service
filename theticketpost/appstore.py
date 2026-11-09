@@ -126,14 +126,18 @@ def install_application(app_name):
 
 
 def load_catalog():
-    """One GitHub API call lists the whole repository (unauthenticated calls are limited
-    to 60/hour); files are downloaded from raw.githubusercontent.com."""
+    """Three GitHub API calls (repository, branch, tree) list the whole repository
+    (unauthenticated calls are limited to 60/hour); files are downloaded from
+    raw.githubusercontent.com."""
     global repo_files, branch, catalog
 
     repository = repository_name
     repo = Github(retry=None, timeout=15).get_repo(repository)
-    default_branch = repo.default_branch
-    tree = repo.get_git_tree(default_branch, recursive=True)
+    # files are read at the branch's last commit, not at the branch name:
+    # raw.githubusercontent.com caches a branch's files for ~5 minutes, and
+    # a push showed up in the tree but with the old desc.json (no update offered)
+    commit = repo.get_branch(repo.default_branch).commit.sha
+    tree = repo.get_git_tree(commit, recursive=True)
     files = [element.path for element in tree.tree if element.type == "blob"]
 
     apps = {}
@@ -141,7 +145,7 @@ def load_catalog():
         folder, _, filename = file_path.partition("/")
         if filename == "desc.json" and not folder.startswith("{{"):
             try:
-                url = RAW_URL.format(repo=repository, ref=default_branch, path=urllib.parse.quote(file_path))
+                url = RAW_URL.format(repo=repository, ref=commit, path=urllib.parse.quote(file_path))
                 response = requests.get(url, timeout=30)
                 response.raise_for_status()
                 desc = json.loads(response.content)
@@ -152,7 +156,8 @@ def load_catalog():
     if repository != repository_name:
         # the repository was changed in Settings while this one was being read
         return False
-    branch, repo_files, catalog = default_branch, files, apps
+    # installs download the same commit the catalog was read from
+    branch, repo_files, catalog = commit, files, apps
     icons.clear()
     logger.info(f"App store loaded {len(catalog)} applications from {repository}")
     return True

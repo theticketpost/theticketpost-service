@@ -176,6 +176,21 @@ async def log_services(client):
                 char.uuid, char.handle, ",".join(char.properties)))
 
 
+async def read_mtu(client):
+    """Ask BlueZ for the negotiated MTU.
+
+    Without this, bleak on Linux reports the minimum (23), and the data went
+    out in 20 byte chunks: too slow, the printer ran out of data mid-ticket,
+    stopped and lost steps when it started again."""
+    acquire = getattr(client._backend, "_acquire_mtu", None)
+    if acquire is None:
+        return
+    try:
+        await acquire()
+    except Exception as e:
+        logger.warning(f"Couldn't read the MTU, sending small chunks: {explain_error(e)}")
+
+
 def black_dots(chunk):
     return sum(byte.bit_count() for byte in chunk)
 
@@ -186,6 +201,7 @@ async def send_data(address, data, pace=True):
         logger.info("Connecting to device with address==" + address + " ...")
         client = await connect(address)
         try:
+            await read_mtu(client)
             logger.info("Connected to device with address==" + address + " MTU: " + str(client.mtu_size))
             await log_services(client)
             chunk_size = client.mtu_size - 3
@@ -204,6 +220,7 @@ async def send_data(address, data, pace=True):
             # bleak < 0.21 did by default: with response every 20 byte chunk
             # waits for a round trip and printing takes minutes.
             logger.info("Transmiting data to device with address==" + address)
+            started = asyncio.get_running_loop().time()
             owed = 0.0
             for chunk in chunkify(data, chunk_size):
                 await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk, response=False)
@@ -214,7 +231,9 @@ async def send_data(address, data, pace=True):
                         await asyncio.sleep(owed)
                         owed = 0.0
 
-            logger.info("Finished data transmission.")
+            elapsed = asyncio.get_running_loop().time() - started
+            logger.info(f"Finished data transmission: {len(data)} bytes in {elapsed:.1f} s "
+                        f"({len(data) / max(elapsed, 0.001) / 1024:.1f} KB/s)")
 
             # wait until the printer says it's done, so we don't cut the job short
             try:

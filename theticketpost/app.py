@@ -21,7 +21,7 @@ import threading
 
 app = Flask(__name__)
 
-version = '1.4.2'
+version = '1.4.3'
 ble_scan_timout = 10
 port = 8080
 

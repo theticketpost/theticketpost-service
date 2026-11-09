@@ -34,6 +34,13 @@ SCAN_TIMEOUT = 20
 # How long to wait for the printer's "done" notification after sending everything
 DONE_TIMEOUT = 120
 DONE_NOTIFICATION = bytearray(b'\x1a\x0f\x0c')
+# Pacing: the printer slows down on dark areas, but writes without response
+# don't wait for it: sending dark areas faster than it prints them can make it
+# lose steps and squash what follows.
+# 384 dots per line: about 60 full black lines per second.
+DARK_DOTS_PER_SECOND = 384 * 60
+# don't sleep for less than this (asyncio.sleep overhead)
+MIN_SLEEP = 0.01
 
 
 def explain_error(e):
@@ -169,7 +176,11 @@ async def log_services(client):
                 char.uuid, char.handle, ",".join(char.properties)))
 
 
-async def send_data(address, data):
+def black_dots(chunk):
+    return sum(byte.bit_count() for byte in chunk)
+
+
+async def send_data(address, data, pace=True):
 
     try:
         logger.info("Connecting to device with address==" + address + " ...")
@@ -184,6 +195,8 @@ async def send_data(address, data):
             def notification_callback(sender, value):
                 if value == DONE_NOTIFICATION:
                     done.set()
+                else:
+                    logger.debug(f"Printer notification: {bytes(value).hex(' ')}")
 
             await client.start_notify(NOTIFICATION_CHARACTERISTIC_UUI, notification_callback)
 
@@ -191,8 +204,15 @@ async def send_data(address, data):
             # bleak < 0.21 did by default: with response every 20 byte chunk
             # waits for a round trip and printing takes minutes.
             logger.info("Transmiting data to device with address==" + address)
+            owed = 0.0
             for chunk in chunkify(data, chunk_size):
                 await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk, response=False)
+                if pace:
+                    # give the printer time to print the dark dots just sent
+                    owed += black_dots(chunk) / DARK_DOTS_PER_SECOND
+                    if owed >= MIN_SLEEP:
+                        await asyncio.sleep(owed)
+                        owed = 0.0
 
             logger.info("Finished data transmission.")
 

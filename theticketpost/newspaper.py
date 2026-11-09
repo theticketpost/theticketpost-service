@@ -138,16 +138,18 @@ def print_locked(address, port):
     with Image.open(path) as img:
         # the printer needs lines of exactly dots_per_line pixels: a wider or
         # narrower image prints as garbage
-        device = theticketpost.settings.get_json("config").get("printer", {}).get("device", {})
+        printer = theticketpost.settings.get_json("config").get("printer", {})
+        device = printer.get("device") or {}
         width = int(device.get("dots_per_line", 384))
         if img.width != width:
             logger.warning(f"Ticket is {img.width}px wide, the printer needs {width}px: resizing")
             img = img.resize((width, round(img.height * width / img.width)))
         dithered = img.convert("1")
         logger.info("Applied Floyd-Steinberg dither...")
-        data = theticketpost.printer.cmd.cmds_print_img( dithered )
+        density = printer.get("density", theticketpost.printer.cmd.DEFAULT_DENSITY)
+        data = theticketpost.printer.cmd.cmds_print_img(dithered, density)
         try:
-            asyncio.run(theticketpost.printer.ble.send_data(address, data))
+            asyncio.run(theticketpost.printer.ble.send_data(address, data, pace=printer.get("pace", True)))
         except Exception as e:
             return 500, str(e)
 

@@ -1,15 +1,21 @@
 from loguru import logger
 
-def cmd_header():
+# Print density (heat), 1 (light) to 4 (darkest). Dark prints draw more current:
+# on a full black line the paper motor can skip steps and squash what follows.
+DEFAULT_DENSITY = 3
+
+
+def cmd_header(density=DEFAULT_DENSITY):
     # 0x1b 0x40      -> command ESC @: initialize printer
     # 0x1b 0x61      -> command ESC a: select justification
     # 0x01           range: 0 (left-justification), 1 centered,
     #                    2 (right justification)
-    # 0x1f 0x11 0x02 0x04
+    # 0x1f 0x11 0x02 -> density (Phomemo), 0x01 to 0x04
+    density = min(4, max(1, int(density)))
     return  b'\x1b\x40'\
             b'\x1b\x61'\
             b'\x01'\
-            b'\x1f\x11\x02\x04'
+            b'\x1f\x11\x02' + density.to_bytes(1, 'little')
 
 
 def cmd_footer():
@@ -57,10 +63,10 @@ def cmd_line(image, line):
     return data
 
 
-def cmds_print_img(image):
+def cmds_print_img(image, density=DEFAULT_DENSITY):
     remaining = image.height
     line=0
-    data = cmd_header()
+    data = cmd_header(density)
     while remaining > 0:
         lines = remaining
         if lines > 256:

@@ -42,6 +42,18 @@
             </label>
         </div>
         <p v-else class="panel-sub">No printer selected. Turn the printer on and scan.</p>
+
+        <label class="label">Print darkness
+            <select class="field" v-model.number="config.printer.density">
+                <option :value="1">1 · Light</option>
+                <option :value="2">2</option>
+                <option :value="3">3 · Normal</option>
+                <option :value="4">4 · Darkest</option>
+            </select>
+        </label>
+        <label class="check-row">Print dark areas slowly (avoids squashed prints after black lines)
+            <input type="checkbox" class="check" v-model="config.printer.pace">
+        </label>
     </section>
 
     <!-- Schedule -->

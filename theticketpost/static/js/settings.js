@@ -6,7 +6,7 @@ function default_config() {
     return {
         repository: { name: 'theticketpost/theticketpost-apps' },
         webserver: { port: 8080 },
-        printer: { device: null },
+        printer: { device: null, density: 3, pace: true },
         renderer: { chromium_path: "" },
         schedule: schedule,
         llm: {},

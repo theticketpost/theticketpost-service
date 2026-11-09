@@ -34,9 +34,10 @@ SCAN_TIMEOUT = 20
 # How long to wait for the printer's "done" notification after sending everything
 DONE_TIMEOUT = 120
 DONE_NOTIFICATION = bytearray(b'\x1a\x0f\x0c')
-# Pacing: the printer slows down on dark areas, but writes without response
-# don't wait for it: sending dark areas faster than it prints them can make it
-# lose steps and squash what follows.
+# Pacing, for printers without flow control (see FlowControl): the printer
+# slows down on dark areas, but writes without response don't wait for it:
+# sending dark areas faster than it prints them can make it lose steps and
+# squash what follows.
 # 384 dots per line: about 60 full black lines per second.
 DARK_DOTS_PER_SECOND = 384 * 60
 # don't sleep for less than this (asyncio.sleep overhead)
@@ -191,6 +192,81 @@ async def read_mtu(client):
         logger.warning(f"Couldn't read the MTU, sending small chunks: {explain_error(e)}")
 
 
+class FlowControl:
+    """Credit based flow control, as these printers do it on the notify characteristic.
+
+    Seen on a printer (MTU 200): right after the first data it sends 02 b6 00,
+    the packets it can hold (0x00b6 = 182, little-endian), then 01 01 each time
+    it prints one. Sending everything at once (~400 packets ahead) made it lose
+    steps. Printers that don't send 02 get no flow control (and the dark-area
+    pacing instead)."""
+
+    # packets sent before the printer announces its window
+    BEFORE_WINDOW = 4
+    WINDOW_TIMEOUT = 1
+    # waiting longer than this for room means the printer stopped confirming
+    ROOM_TIMEOUT = 10
+
+    def __init__(self):
+        self.window = None
+        self.sent = 0
+        self.acked = 0
+        self.max_outstanding = 0
+        self.disabled = False
+        self.changed = asyncio.Event()
+
+    @property
+    def active(self):
+        return self.window is not None and not self.disabled
+
+    def notification(self, value):
+        """Take a flow control notification; False if it's something else."""
+        if len(value) == 3 and value[0] == 0x02:
+            self.window = int.from_bytes(value[1:3], 'little')
+            logger.info(f"Printer buffer: {self.window} packets")
+        elif len(value) == 2 and value[0] == 0x01:
+            # one arrives before any data: never count more than was sent
+            self.acked = min(self.acked + value[1], self.sent)
+        else:
+            return False
+        self.changed.set()
+        return True
+
+    def has_room(self):
+        outstanding = self.sent - self.acked
+        limit = self.window if self.window is not None else self.BEFORE_WINDOW
+        return outstanding < limit
+
+    async def wait_for_room(self):
+        if self.disabled:
+            return
+        loop = asyncio.get_running_loop()
+        timeout = self.ROOM_TIMEOUT if self.window is not None else self.WINDOW_TIMEOUT
+        deadline = loop.time() + timeout
+        while not self.has_room():
+            self.changed.clear()
+            remaining = deadline - loop.time()
+            try:
+                if remaining <= 0:
+                    raise asyncio.TimeoutError
+                await asyncio.wait_for(self.changed.wait(), remaining)
+            except asyncio.TimeoutError:
+                if self.window is None:
+                    logger.info("The printer doesn't report its buffer, sending without flow control")
+                else:
+                    logger.warning(f"The printer stopped confirming packets ({self.sent - self.acked} pending), "
+                                   "sending the rest without flow control")
+                self.disabled = True
+                return
+        self.max_outstanding = max(self.max_outstanding, self.sent - self.acked + 1)
+
+    def summary(self):
+        if self.window is None:
+            return "not reported by the printer"
+        return (f"buffer {self.window} packets, {self.acked}/{self.sent} confirmed, "
+                f"at most {self.max_outstanding} pending" + (" (gave up)" if self.disabled else ""))
+
+
 def black_dots(chunk):
     return sum(byte.bit_count() for byte in chunk)
 
@@ -207,11 +283,12 @@ async def send_data(address, data, pace=True):
             chunk_size = client.mtu_size - 3
 
             done = asyncio.Event()
+            flow = FlowControl()
 
             def notification_callback(sender, value):
                 if value == DONE_NOTIFICATION:
                     done.set()
-                else:
+                elif not flow.notification(value):
                     logger.debug(f"Printer notification: {bytes(value).hex(' ')}")
 
             await client.start_notify(NOTIFICATION_CHARACTERISTIC_UUI, notification_callback)
@@ -223,9 +300,11 @@ async def send_data(address, data, pace=True):
             started = asyncio.get_running_loop().time()
             owed = 0.0
             for chunk in chunkify(data, chunk_size):
+                await flow.wait_for_room()
                 await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk, response=False)
-                if pace:
-                    # give the printer time to print the dark dots just sent
+                flow.sent += 1
+                if pace and not flow.active:
+                    # no flow control: give the printer time to print the dark dots just sent
                     owed += black_dots(chunk) / DARK_DOTS_PER_SECOND
                     if owed >= MIN_SLEEP:
                         await asyncio.sleep(owed)
@@ -240,6 +319,7 @@ async def send_data(address, data, pace=True):
                 await asyncio.wait_for(done.wait(), DONE_TIMEOUT)
             except asyncio.TimeoutError:
                 logger.warning("The printer didn't report the end of the job, disconnecting anyway")
+            logger.info(f"Flow control: {flow.summary()}")
         finally:
             await client.disconnect()
 
